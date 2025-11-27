@@ -60,10 +60,11 @@
             background: #274bb8;
         }
 
+        /* Slide-out phone panel */
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -350px;
+            right: -350px; /* hidden by default */
             width: 300px;
             height: 100vh;
             background: #ffffff;
@@ -95,13 +96,13 @@
 
 <body>
 <header>
-    Bedford Support Map <span class="brand-tag">by Checkpoint</span>
+    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
 </header>
 
 <!-- Map -->
 <div id="map"></div>
 
-<!-- Key -->
+<!-- Legend -->
 <div class="legend">
     <b>Key</b><br><br>
     <i style='color:red;'>●</i> Help Centres<br>
@@ -112,15 +113,20 @@
     <i style='color:orange;'>●</i> Local Services<br>
 </div>
 
-<button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
+<!-- Phone list button -->
+<button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
+<!-- Slide-out phone panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
     <ul>
-        <li>Citizens Advice — <b>(number)</b></li>
+        <li>Citizens Advice — <b>00000 000000</b></li>
+        <li>Bedford Foodbank — <b>00000 000000</b></li>
+        <li>Mental Health Support — <b>00000 000000</b></li>
+        <li>Emergency Services — <b>999</b></li>
         <br>
-        <li>(etc - EDIT)</li>
+        <li>(add more as needed)</li>
     </ul>
 </div>
 
@@ -129,6 +135,7 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
+// LOCATION DATA
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -171,11 +178,13 @@ const colourMap = {
     "Local Service": "orange"
 };
 
+// MAP
 const map = L.map('map').setView([52.135, -0.47], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// GEOCODE + POPUPS
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -209,6 +218,11 @@ fetch("https://api.postcodes.io/postcodes", {
         .addTo(map);
     });
 });
+</script>
+
+</body>
+</html>
+
 </script>
 
 </body>
