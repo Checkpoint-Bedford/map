@@ -60,7 +60,7 @@
             background: #274bb8;
         }
 
-        /* Slide-out phone panel */
+        /* phone numbers */
         .phone-panel {
             position: fixed;
             top: 0;
@@ -96,7 +96,7 @@
 
 <body>
 <header>
-    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
+    Bedford Support Map <span class="brand-tag">by Checkpoint</span>
 </header>
 
 <!-- Map -->
@@ -114,19 +114,16 @@
 </div>
 
 <!-- Phone list button -->
-<button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
+<button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
 
 <!-- Slide-out phone panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
     <ul>
-        <li>Citizens Advice — <b>00000 000000</b></li>
-        <li>Bedford Foodbank — <b>00000 000000</b></li>
-        <li>Mental Health Support — <b>00000 000000</b></li>
-        <li>Emergency Services — <b>999</b></li>
+        <li>Citizens Advice — <b>(number)</b></li>
         <br>
-        <li>(add more as needed)</li>
+        <li>(etc - EDIT)</li>
     </ul>
 </div>
 
@@ -179,13 +176,13 @@ const colourMap = {
     "Local Service": "orange"
 };
 
-// MAP
+// map
 const map = L.map('map').setView([52.135, -0.47], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// GEOCODE + POPUPS
+// geocodes and popups
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
