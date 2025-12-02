@@ -64,14 +64,15 @@
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -350px;
-            width: 300px;
+            right: -450px;     /* hidden */
+            width: 420px;      /* wider */
             height: 100vh;
             background: #ffffff;
             box-shadow: -3px 0 8px rgba(0,0,0,0.3);
             padding: 20px;
             transition: right 0.35s ease;
             z-index: 10001;
+            overflow-y: auto;   /* scrolling enabled */
         }
 
         .phone-panel.open {
