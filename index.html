@@ -1,180 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bedford Support Awareness Poster</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>CHECKPOINT | Bedford Support Map</title>
 
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #f2f6ff;
-    padding: 40px;
-    color: #000000;
-  }
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  .poster {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  }
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-  h1 {
-    text-align: center;
-    color: #000000;
-    font-size: 2.4rem;
-    margin-bottom: 20px;
-    font-weight: 600;
-  }
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 15px 25px;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
 
-  h2 {
-    color: #000000;
-    margin-top: 30px;
-    font-weight: 600;
-    font-size: 1.6rem;
-  }
+        #map {
+            height: calc(100vh - 70px);
+            width: 100%;
+        }
 
-  .stat-box, .highlight {
-    padding: 18px 22px;
-    margin: 16px 0;
-    border-radius: 10px;
-    font-size: 1.25rem;
-    line-height: 1.55;
-  }
+        /* Legend */
+        .legend {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px 18px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+            z-index: 9999;
+            font-size: 14px;
+        }
 
-  .stat-box {
-    background: #e8f0ff;
-    border-left: 6px solid #0057b7;
-  }
+        /* Floating button */
+        .phone-btn {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+            z-index: 10000;
+        }
 
-  .highlight {
-    background: #ffe6f7;
-    border-left: 6px solid #ff4fc3;
-  }
+        .phone-btn:hover {
+            background: #274bb8;
+        }
 
-  .qr-section {
-    background: #f5e9ff;
-    padding: 30px 20px;
-    border-radius: 15px;
-    margin-top: 35px;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
+        /* Slide-out phone panel */
+        .phone-panel {
+            position: fixed;
+            top: 0;
+            right: -350px; /* hidden by default */
+            width: 300px;
+            height: 100vh;
+            background: #ffffff;
+            box-shadow: -3px 0 8px rgba(0,0,0,0.3);
+            padding: 20px;
+            transition: right 0.35s ease;
+            z-index: 10001;
+        }
 
-  .qr-placeholder {
-    width: 180px;
-    height: 180px;
-    background: #d9c2ff;
-    border-radius: 10px;
-    margin: 20px auto 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #4b0082;
-    font-weight: 600;
-  }
+        .phone-panel.open {
+            right: 0;
+        }
 
-  .image-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0 30px 0;
-    gap: 10px;
-  }
+        .panel-close {
+            float: right;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: -5px;
+        }
 
-  .image-box {
-    flex: 1;
-    height: 140px;
-    background: #e3e3e3;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-  }
-
-  /* ----------------------- */
-  /*     STRONGER MOBILE     */
-  /* ----------------------- */
-  @media (max-width: 600px) {
-
-    body {
-      padding: 20px;
-    }
-
-    .poster {
-      padding: 24px;
-    }
-
-    /* Bigger text */
-    h1 {
-      font-size: 2rem;
-      line-height: 1.2;
-    }
-
-    h2 {
-      font-size: 1.4rem;
-    }
-
-    p, .stat-box, .highlight {
-      font-size: 1.15rem;
-      line-height: 1.6;
-    }
-
-    /* Prevent tiny text shrink */
-    * {
-      font-size-adjust: 0.55;
-    }
-
-    .image-row {
-      flex-direction: column;
-    }
-
-    .image-box {
-      width: 100%;
-      height: 160px;
-      font-size: 1rem;
-    }
-
-    .qr-placeholder {
-      width: 200px;
-      height: 200px;
-      font-size: 1.1rem;
-    }
-  }
-</style>
+        .brand-tag {
+            font-size: 12px;
+            color: #d1d5db;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="poster">
-    <h1>Do People in Bedford Know Where to Access Support?</h1>
+<header>
+    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
+</header>
 
-    <h2>What We Found:</h2>
-    <div class="stat-box">2 out of 3 residents didn’t know where their nearest walk-in health clinic is.</div>
-    <div class="stat-box">Most people reported they don’t have many areas to access support in Bedford.</div>
-    <div class="stat-box">Over half didn’t know about local organisations such as<br>Recovery Lounge Bedford, King’s Arm Project, and Job Centre Plus.</div>
+<!-- Map -->
+<div id="map"></div>
 
-    <div class="image-row">
-      <div class="image-box">Image 1</div>
-      <div class="image-box">Image 2</div>
-      <div class="image-box">Image 3</div>
-    </div>
+<!-- Legend -->
+<div class="legend">
+    <b>Legend</b><br><br>
+    <i style='color:red;'>●</i> Help Centres<br>
+    <i style='color:blue;'>●</i> Mental Health & Wellbeing<br>
+    <i style='color:green;'>●</i> Education & Youth<br>
+    <i style='color:purple;'>●</i> Diverse Centres<br>
+    <i style='color:cadetblue;'>●</i> Outdoor Wellbeing<br>
+    <i style='color:orange;'>●</i> Local Services<br>
+</div>
 
-    <h2>Why This Matters</h2>
-    <div class="highlight">
-      We thought—what’s the point in having support organisations if people don’t even know they exist?<br><br>
-      Instead of adding another organisation to the noise, we’ve built a simple and effective way to raise awareness of what’s already available — from mental wellbeing to employment support, health services, and homelessness support.
-    </div>
+<!-- Phone list button -->
+<button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
-    <div class="qr-section">
-      <h2>Our solution: A Map!</h2>
-      <p>Scan to view our colour-coded map of Bedford highlighting help centres, wellbeing hubs, youth development areas, outdoor wellbeing spaces and local services — plus phone numbers!</p>
-      <div class="qr-placeholder">QR CODE</div>
-    </div>
-  </div>
+<!-- Slide-out phone panel -->
+<div id="phonePanel" class="phone-panel">
+    <span class="panel-close" onclick="togglePhonePanel()">✖</span>
+    <h3>Useful Phone Numbers</h3>
+    <ul>
+        <li>Citizens Advice — <b>00000 000000</b></li>
+        <li>Bedford Foodbank — <b>00000 000000</b></li>
+        <li>Mental Health Support — <b>00000 000000</b></li>
+        <li>Emergency Services — <b>999</b></li>
+        <br>
+        <li>(add more as needed)</li>
+    </ul>
+</div>
+
+<script>
+function togglePhonePanel() {
+    document.getElementById("phonePanel").classList.toggle("open");
+}
+
+// LOCATION DATA
+const locations = [
+    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
+    ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
+    ["BRASS Bedford", "MK40 2RB", "Help Centre"],
+    ["Kings Arm Project", "MK42 9AZ", "Help Centre"],
+    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre"],
+    ["Beds Domestic & Sexual Abuse Partnership", "SG1 5TQ", "Help Centre"],
+    ["Job Centre Plus", "MK40 2EH", "Help Centre"],
+
+    ["CAMHS", "MK42 9DJ", "Wellbeing"],
+    ["Queen’s Park Family Hub", "MK40 4LE", "Wellbeing"],
+    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing"],
+
+    ["Bedford Central Library", "MK40 1PG", "Education"],
+    ["Kempston Library", "MK42 8AT", "Education"],
+    ["Wootton Library", "MK43 9LH", "Education"],
+    ["YMCA Bedfordshire", "MK40 2AA", "Education"],
+
+    ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
+    ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
+
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
+    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing"],
+    ["Sandy Sports Centre", "SG19 1BL", "Outdoor Wellbeing"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
+
+    ["De Parys Medical Group", "MK40 2TX", "Local Service"],
+    ["Priory Health Clinic", "MK41 6GA", "Local Service"],
+    ["Queen’s Park Surgery", "MK40 4HR", "Local Service"],
+    ["London Road Surgery", "MK42 0NT", "Local Service"],
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
+];
+
+const colourMap = {
+    "Help Centre": "red",
+    "Wellbeing": "blue",
+    "Education": "green",
+    "Diverse": "purple",
+    "Outdoor Wellbeing": "cadetblue",
+    "Local Service": "orange"
+};
+
+// MAP
+const map = L.map('map').setView([52.135, -0.47], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// GEOCODE + POPUPS
+const postcodes = locations.map(l => l[1]);
+
+fetch("https://api.postcodes.io/postcodes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ postcodes })
+})
+.then(res => res.json())
+.then(data => {
+    data.result.forEach((entry, i) => {
+        if (!entry.result) return;
+
+        const name = locations[i][0];
+        const postcode = locations[i][1];
+        const category = locations[i][2];
+
+        const lat = entry.result.latitude;
+        const lon = entry.result.longitude;
+
+        L.circleMarker([lat, lon], {
+            radius: 6,
+            color: colourMap[category],
+            fillColor: colourMap[category],
+            fillOpacity: 0.8
+        })
+        .bindPopup(`
+            <b>${name}</b><br>
+            ${postcode}<br>
+            <span style="color:#555; font-style:italic;">(description goes here)</span>
+        `)
+        .addTo(map);
+    });
+});
+</script>
+
 </body>
 </html>
-
