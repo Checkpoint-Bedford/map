@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>CHECKPOINT | Bedford Support Map</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -30,28 +32,28 @@
         /* Legend */
         .legend {
             position: fixed;
-            bottom: 40px;
-            left: 40px;
+            bottom: 20px;
+            left: 20px;
             background: white;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 15px 18px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.25);
             z-index: 9999;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         /* Floating button */
         .phone-btn {
             position: fixed;
             top: 90px;
-            right: 30px;
+            right: 20px;
             background: #1e3a8a;
             color: white;
             border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
+            padding: 14px 20px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 18px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.25);
             z-index: 10000;
         }
@@ -64,14 +66,15 @@
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -350px; /* hidden by default */
+            right: -350px;
             width: 300px;
             height: 100vh;
             background: #ffffff;
             box-shadow: -3px 0 8px rgba(0,0,0,0.3);
-            padding: 20px;
+            padding: 25px;
             transition: right 0.35s ease;
             z-index: 10001;
+            font-size: 17px;
         }
 
         .phone-panel.open {
@@ -81,15 +84,41 @@
         .panel-close {
             float: right;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 22px;
             margin-top: -5px;
         }
 
         .brand-tag {
-            font-size: 12px;
+            font-size: 13px;
             color: #d1d5db;
             margin-left: 10px;
             font-weight: normal;
+        }
+
+        /* 📱 MOBILE FIXES */
+        @media (max-width: 600px) {
+            header {
+                font-size: 20px;
+                padding: 12px 15px;
+            }
+            .brand-tag {
+                font-size: 11px;
+            }
+            .legend {
+                font-size: 18px;
+                padding: 16px;
+                bottom: 15px;
+                left: 15px;
+            }
+            .phone-btn {
+                font-size: 20px;
+                padding: 16px 22px;
+                right: 15px;
+            }
+            .phone-panel {
+                width: 85%;
+                font-size: 19px;
+            }
         }
     </style>
 </head>
@@ -99,10 +128,8 @@
     Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
 </header>
 
-<!-- Map -->
 <div id="map"></div>
 
-<!-- Legend -->
 <div class="legend">
     <b>Legend</b><br><br>
     <i style='color:red;'>●</i> Help Centres<br>
@@ -113,10 +140,8 @@
     <i style='color:orange;'>●</i> Local Services<br>
 </div>
 
-<!-- Phone list button -->
 <button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
-<!-- Slide-out phone panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
@@ -135,7 +160,16 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-// LOCATION DATA
+/* MAP with max zoom limit */
+const map = L.map('map', {
+    maxZoom: 15   // prevents zooming beyond ~300%
+}).setView([52.135, -0.47], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+/* LOCATION DATA */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -179,13 +213,6 @@ const colourMap = {
     "Local Service": "orange"
 };
 
-// MAP
-const map = L.map('map').setView([52.135, -0.47], 12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-// GEOCODE + POPUPS
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -206,16 +233,12 @@ fetch("https://api.postcodes.io/postcodes", {
         const lon = entry.result.longitude;
 
         L.circleMarker([lat, lon], {
-            radius: 6,
+            radius: 7,
             color: colourMap[category],
             fillColor: colourMap[category],
-            fillOpacity: 0.8
+            fillOpacity: 0.85
         })
-        .bindPopup(`
-            <b>${name}</b><br>
-            ${postcode}<br>
-            <span style="color:#555; font-style:italic;">(description goes here)</span>
-        `)
+        .bindPopup(`<b>${name}</b><br>${postcode}<br><span style="color:#555; font-style:italic;">(description goes here)</span>`)
         .addTo(map);
     });
 });
@@ -223,3 +246,4 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
+
