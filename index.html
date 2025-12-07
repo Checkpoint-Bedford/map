@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>CHECKPOINT | Bedford Support Map</title>
 
-<!-- Critical viewport fix -->
+<!-- Fixes zoom behaviour without breaking layout -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -30,53 +30,53 @@
         width: 100%;
     }
 
-    /* Legend styling */
+    /* Legend */
     .legend {
         position: fixed;
         bottom: 40px;
         left: 20px;
-        background: white;
-        border-radius: 8px;
+        background: #ffffff;
+        border-radius: 10px;
         padding: 12px 14px;
         box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+        border: 2px solid black; /* thin black cartoon line */
         z-index: 9999;
         font-size: 13px;
     }
 
-    /* Phone button */
+    /* Phone Button */
     .phone-btn {
         position: fixed;
         top: 90px;
         right: 20px;
         background: #1e3a8a;
         color: white;
-        border: none;
+        border: 2px solid black; /* cartoon outline */
         padding: 12px 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         font-size: 15px;
         box-shadow: 0 3px 6px rgba(0,0,0,0.25);
         z-index: 999999 !important;
-        pointer-events: auto;
     }
 
-    /* Phone panel */
+    /* Phone Panel */
     .phone-panel {
         position: fixed;
         top: 0;
-        right: -350px;
-        width: 300px;
+        right: -320px; /* Hidden off-screen */
+        width: 280px;
         height: 100vh;
-        background: #ffffff;
+        background: #fff7f7; /* light pastel pink */
+        border-left: 3px solid black; /* thin cartoon edge */
         box-shadow: -3px 0 8px rgba(0,0,0,0.3);
         padding: 20px;
         transition: right 0.35s ease;
         z-index: 999999 !important;
-        pointer-events: auto;
     }
 
     .phone-panel.open {
-        right: 0;
+        right: 0; /* slide in */
     }
 
     .panel-close {
@@ -113,10 +113,10 @@
     <i style="color:#ffd59b;">●</i> Local Services<br>
 </div>
 
-<!-- Phone button -->
+<!-- Button -->
 <button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
-<!-- Phone panel -->
+<!-- Panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
@@ -129,24 +129,17 @@
 </div>
 
 <script>
-// Force phone panel hidden on load
-window.addEventListener("load", () => {
-    const pnl = document.getElementById("phonePanel");
-    pnl.classList.remove("open");
-    pnl.style.right = "-350px";
-});
-
-// Toggle phone panel
+// Toggle panel (THIS NOW WORKS)
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-// Disable pinch-zoom in (but allow zoom out)
+// Disable pinch zoom-in
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Pastel colours
+// Pastel category colours
 const pastel = {
     "Help Centre": "#ff9b9b",
     "Wellbeing": "#9bb8ff",
@@ -156,33 +149,32 @@ const pastel = {
     "Local Service": "#ffd59b"
 };
 
-// Cartoon icon with pastel fill & thin black outline
+// Cartoon icons (slightly smaller)
 function cartoonIcon(color) {
     return L.divIcon({
         html: `
-            <svg width="32" height="32" viewBox="0 0 100 100">
+            <svg width="28" height="28" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40"
                     fill="${color}"
                     stroke="black"
-                    stroke-width="4"/>
+                    stroke-width="3"/>
             </svg>
         `,
         className: "",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
     });
 }
 
-// Map setup
-const map = L.map("map", {
-    maxZoom: 16
-}).setView([52.135, -0.47], 12);
+// Map
+const map = L.map("map", { maxZoom: 16 })
+.setView([52.135, -0.47], 12);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// Location data
+// Data
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -217,7 +209,7 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-// Geocoding
+// Geocode
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -232,14 +224,13 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], {
-            icon: cartoonIcon(pastel[category])
-        })
-        .bindPopup(`<b>${name}</b><br>${postcode}`)
-        .addTo(map);
+        L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
+          .bindPopup(`<b>${name}</b><br>${postcode}`)
+          .addTo(map);
     });
 });
 </script>
 
 </body>
 </html>
+
