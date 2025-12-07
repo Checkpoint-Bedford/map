@@ -101,12 +101,12 @@
 
 <div class="legend">
     <b>Index</b><br><br>
-    <i style="color:#ff6b6b;">●</i> Help Centres<br>
-    <i style="color:#6f9dff;">●</i> Mental Health & Wellbeing<br>
-    <i style="color:#52e27a;">●</i> Education & Youth<br>
-    <i style="color:#c176ff;">●</i> Diverse Centres<br>
-    <i style="color:#63d6db;">●</i> Outdoor Wellbeing<br>
-    <i style="color:#ffb55a;">●</i> Local Services<br>
+    <i style="color:#d62828;">●</i> Help Centres<br>
+    <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
+    <i style="color:#138a36;">●</i> Education & Youth<br>
+    <i style="color:#7e22ce;">●</i> Diverse Centres<br>
+    <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
+    <i style="color:#f97316;">●</i> Local Services<br>
 </div>
 
 <button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
@@ -150,13 +150,14 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
+// Darker, matching marker colours
 const pastel = {
     "Help Centre": "#d62828",
     "Wellbeing": "#1d4ed8",
     "Education": "#138a36",
     "Diverse": "#7e22ce",
     "Outdoor Wellbeing": "#0e7490",
-    "Local Service": "#c2410c"
+    "Local Service": "#f97316"
 };
 
 function cartoonIcon(color) {
@@ -240,3 +241,4 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
+
