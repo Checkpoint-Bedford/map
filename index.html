@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -13,14 +13,13 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            overscroll-behavior: none; /* prevent iOS side pull */
         }
 
         header {
             background: #1e3a8a;
             color: white;
             padding: 15px 25px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
@@ -30,13 +29,14 @@
             width: 100%;
         }
 
+        /* Legend */
         .legend {
             position: fixed;
             bottom: 40px;
             left: 20px;
             background: white;
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 12px 14px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.25);
             z-index: 9999;
             font-size: 13px;
@@ -50,19 +50,23 @@
             background: #1e3a8a;
             color: white;
             border: none;
-            padding: 12px 18px;
+            padding: 12px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.25);
             z-index: 10000;
         }
 
-        /* FIXED: Panel NEVER shows unless opened */
+        .phone-btn:hover {
+            background: #274bb8;
+        }
+
+        /* Phone panel */
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -350px; /* fully hidden ALWAYS */
+            right: -350px;
             width: 300px;
             height: 100vh;
             background: #ffffff;
@@ -70,10 +74,8 @@
             padding: 20px;
             transition: right 0.35s ease;
             z-index: 10001;
-            will-change: right;
         }
 
-        /* Open state */
         .phone-panel.open {
             right: 0;
         }
@@ -101,6 +103,7 @@
 
 <div id="map"></div>
 
+<!-- Legend -->
 <div class="legend">
     <b>Legend</b><br><br>
     <i style='color:red;'>●</i> Help Centres<br>
@@ -111,8 +114,10 @@
     <i style='color:orange;'>●</i> Local Services<br>
 </div>
 
+<!-- Phone list button -->
 <button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
+<!-- Phone panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
@@ -125,17 +130,24 @@
 </div>
 
 <script>
-/* FINAL FIX: Phone menu NEVER slides out unless button tapped */
+// FORCE HIDE phone panel on initial load
+window.addEventListener("load", () => {
+    const pnl = document.getElementById("phonePanel");
+    pnl.classList.remove("open");
+    pnl.style.right = "-350px";
+});
+
+// Toggle phone panel
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
+// STOP pinch zooming in (but allow zoom out)
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-
-/* DATA */
+// Locations
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -170,7 +182,7 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-const colourMap = {
+const colours = {
     "Help Centre": "red",
     "Wellbeing": "blue",
     "Education": "green",
@@ -179,68 +191,40 @@ const colourMap = {
     "Local Service": "orange"
 };
 
-
-/* CARTOON ICON — black border, smaller */
+// Cartoon icon generator
 function cartoonIcon(color) {
     return L.divIcon({
         html: `
-            <svg width="40" height="40" viewBox="0 0 100 100">
+            <svg width="36" height="36" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40"
                     fill="${color}"
-                    stroke="black"
-                    stroke-width="10"/>
+                    stroke="rgba(0,0,0,0.45)"
+                    stroke-width="8"/>
             </svg>
         `,
         className: "",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
     });
 }
 
-
-/* MAP */
+// Map
 const map = L.map('map', {
-    minZoom: 2,
-    maxZoom: 17
+    zoomControl: true,
+    maxZoom: 16  // STOP zooming in too far
 }).setView([52.135, -0.47], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-
-/* GEOCODE + plot */
-const postcodes = locations.map(l => l[1]);
-
+// Geocode
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ postcodes })
+    body: JSON.stringify({ postcodes: locations.map(l => l[1]) })
 })
 .then(res => res.json())
 .then(data => {
     data.result.forEach((entry, i) => {
-        if (!entry.result) return;
-
-        const name = locations[i][0];
-        const postcode = locations[i][1];
-        const category = locations[i][2];
-
-        const lat = entry.result.latitude;
-        const lon = entry.result.longitude;
-
-        L.marker([lat, lon], {
-            icon: cartoonIcon(colourMap[category])
-        })
-        .bindPopup(`
-            <b>${name}</b><br>
-            ${postcode}<br>
-            <span style="color:#555; font-style:italic;">(description goes here)</span>
-        `)
-        .addTo(map);
-    });
-});
-</script>
-
-</body>
-</html>
+        if (!entry.result) retu
