@@ -1,121 +1,119 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>CHECKPOINT | Bedford Support Map</title>
+<meta charset="utf-8">
+<title>CHECKPOINT | Bedford Support Map</title>
 
-    <!-- FIXED VIEWPORT — THIS STOPS THE PANEL SHOWING ON LOAD -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<!-- Critical viewport fix -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
 
-        header {
-            background: #1e3a8a;
-            color: white;
-            padding: 15px 25px;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
+    header {
+        background: #1e3a8a;
+        color: white;
+        padding: 15px 25px;
+        font-size: 20px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
 
-        #map {
-            height: calc(100vh - 70px);
-            width: 100%;
-        }
+    #map {
+        height: calc(100vh - 70px);
+        width: 100%;
+    }
 
-        /* Legend */
-        .legend {
-            position: fixed;
-            bottom: 40px;
-            left: 20px;
-            background: white;
-            border-radius: 8px;
-            padding: 12px 14px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-            z-index: 9999;
-            font-size: 13px;
-        }
+    /* Legend styling */
+    .legend {
+        position: fixed;
+        bottom: 40px;
+        left: 20px;
+        background: white;
+        border-radius: 8px;
+        padding: 12px 14px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+        z-index: 9999;
+        font-size: 13px;
+    }
 
-        /* Phone button */
-        .phone-btn {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            background: #1e3a8a;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-            z-index: 10000;
-        }
+    /* Phone button */
+    .phone-btn {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        background: #1e3a8a;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+        z-index: 999999 !important;
+        pointer-events: auto;
+    }
 
-        .phone-btn:hover {
-            background: #274bb8;
-        }
+    /* Phone panel */
+    .phone-panel {
+        position: fixed;
+        top: 0;
+        right: -350px;
+        width: 300px;
+        height: 100vh;
+        background: #ffffff;
+        box-shadow: -3px 0 8px rgba(0,0,0,0.3);
+        padding: 20px;
+        transition: right 0.35s ease;
+        z-index: 999999 !important;
+        pointer-events: auto;
+    }
 
-        /* Phone panel */
-        .phone-panel {
-            position: fixed;
-            top: 0;
-            right: -350px;
-            width: 300px;
-            height: 100vh;
-            background: #ffffff;
-            box-shadow: -3px 0 8px rgba(0,0,0,0.3);
-            padding: 20px;
-            transition: right 0.35s ease;
-            z-index: 10001;
-        }
+    .phone-panel.open {
+        right: 0;
+    }
 
-        .phone-panel.open {
-            right: 0;
-        }
+    .panel-close {
+        float: right;
+        cursor: pointer;
+        font-size: 18px;
+        margin-top: -5px;
+    }
 
-        .panel-close {
-            float: right;
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: -5px;
-        }
-
-        .brand-tag {
-            font-size: 12px;
-            color: #d1d5db;
-            margin-left: 10px;
-            font-weight: normal;
-        }
-    </style>
+    .brand-tag {
+        font-size: 12px;
+        color: #d1d5db;
+        margin-left: 10px;
+        font-weight: normal;
+    }
+</style>
 </head>
 
 <body>
+
 <header>
     Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
 </header>
 
 <div id="map"></div>
 
-<!-- Legend -->
 <div class="legend">
     <b>Legend</b><br><br>
-    <i style='color:red;'>●</i> Help Centres<br>
-    <i style='color:blue;'>●</i> Mental Health & Wellbeing<br>
-    <i style='color:green;'>●</i> Education & Youth<br>
-    <i style='color:purple;'>●</i> Diverse Centres<br>
-    <i style='color:cadetblue;'>●</i> Outdoor Wellbeing<br>
-    <i style='color:orange;'>●</i> Local Services<br>
+    <i style="color:#ff9b9b;">●</i> Help Centres<br>
+    <i style="color:#9bb8ff;">●</i> Mental Health & Wellbeing<br>
+    <i style="color:#9bffb0;">●</i> Education & Youth<br>
+    <i style="color:#d7a4ff;">●</i> Diverse Centres<br>
+    <i style="color:#a7e5e8;">●</i> Outdoor Wellbeing<br>
+    <i style="color:#ffd59b;">●</i> Local Services<br>
 </div>
 
-<!-- Phone list button -->
+<!-- Phone button -->
 <button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
 <!-- Phone panel -->
@@ -131,7 +129,7 @@
 </div>
 
 <script>
-// FORCE HIDE phone panel on initial load
+// Force phone panel hidden on load
 window.addEventListener("load", () => {
     const pnl = document.getElementById("phonePanel");
     pnl.classList.remove("open");
@@ -143,12 +141,48 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-// STOP pinch zooming in (but allow zoom out)
+// Disable pinch-zoom in (but allow zoom out)
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Locations
+// Pastel colours
+const pastel = {
+    "Help Centre": "#ff9b9b",
+    "Wellbeing": "#9bb8ff",
+    "Education": "#9bffb0",
+    "Diverse": "#d7a4ff",
+    "Outdoor Wellbeing": "#a7e5e8",
+    "Local Service": "#ffd59b"
+};
+
+// Cartoon icon with pastel fill & thin black outline
+function cartoonIcon(color) {
+    return L.divIcon({
+        html: `
+            <svg width="32" height="32" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40"
+                    fill="${color}"
+                    stroke="black"
+                    stroke-width="4"/>
+            </svg>
+        `,
+        className: "",
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+}
+
+// Map setup
+const map = L.map("map", {
+    maxZoom: 16
+}).setView([52.135, -0.47], 12);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+// Location data
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -183,62 +217,24 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-const colours = {
-    "Help Centre": "red",
-    "Wellbeing": "blue",
-    "Education": "green",
-    "Diverse": "purple",
-    "Outdoor Wellbeing": "cadetblue",
-    "Local Service": "orange"
-};
-
-// Cartoon icon generator
-function cartoonIcon(color) {
-    return L.divIcon({
-        html: `
-            <svg width="36" height="36" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40"
-                    fill="${color}"
-                    stroke="rgba(0,0,0,0.45)"
-                    stroke-width="8"/>
-            </svg>
-        `,
-        className: "",
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
-    });
-}
-
-// Map
-const map = L.map('map', {
-    zoomControl: true,
-    maxZoom: 16  // STOP zooming in too far
-}).setView([52.135, -0.47], 12);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-
-// Geocode
+// Geocoding
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ postcodes: locations.map(l => l[1]) })
 })
-.then(res => res.json())
+.then(r => r.json())
 .then(data => {
     data.result.forEach((entry, i) => {
         if (!entry.result) return;
 
-        const name = locations[i][0];
-        const postcode = locations[i][1];
-        const category = locations[i][2];
-        const color = colours[category];
-
+        const [name, postcode, category] = locations[i];
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], { icon: cartoonIcon(color) })
+        L.marker([lat, lon], {
+            icon: cartoonIcon(pastel[category])
+        })
         .bindPopup(`<b>${name}</b><br>${postcode}`)
         .addTo(map);
     });
@@ -247,5 +243,3 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
-
-        
