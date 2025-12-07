@@ -13,7 +13,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            overscroll-behavior: none; /* STOP iOS sliding the panel back open */
+            overscroll-behavior: none; /* prevent iOS side pull */
         }
 
         header {
@@ -42,6 +42,7 @@
             font-size: 13px;
         }
 
+        /* Phone button */
         .phone-btn {
             position: fixed;
             top: 90px;
@@ -57,10 +58,11 @@
             z-index: 10000;
         }
 
+        /* FIXED: Panel NEVER shows unless opened */
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -320px;
+            right: -350px; /* fully hidden ALWAYS */
             width: 300px;
             height: 100vh;
             background: #ffffff;
@@ -68,8 +70,10 @@
             padding: 20px;
             transition: right 0.35s ease;
             z-index: 10001;
+            will-change: right;
         }
 
+        /* Open state */
         .phone-panel.open {
             right: 0;
         }
@@ -121,32 +125,16 @@
 </div>
 
 <script>
-/* FIX: prevent panel re-opening accidentally */
-let panelLocked = false;
-
+/* FINAL FIX: Phone menu NEVER slides out unless button tapped */
 function togglePhonePanel() {
-    const panel = document.getElementById("phonePanel");
-
-    if (!panel.classList.contains("open")) {
-        panel.classList.add("open");
-        panelLocked = false;
-    } else {
-        panel.classList.remove("open");
-        panelLocked = true;
-        setTimeout(() => panelLocked = false, 600);
-    }
+    document.getElementById("phonePanel").classList.toggle("open");
 }
 
-document.addEventListener("touchstart", () => {
-    if (panelLocked) return;
-});
-
-/* Disable pinch zoom only for zooming IN */
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-/* ------------------------------------------- */
+
 /* DATA */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
@@ -191,31 +179,37 @@ const colourMap = {
     "Local Service": "orange"
 };
 
-/* CARTOON MARKER SVG */
+
+/* CARTOON ICON — black border, smaller */
 function cartoonIcon(color) {
     return L.divIcon({
         html: `
-            <svg width="34" height="34" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="6"/>
+            <svg width="40" height="40" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40"
+                    fill="${color}"
+                    stroke="black"
+                    stroke-width="10"/>
             </svg>
         `,
         className: "",
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
     });
 }
+
 
 /* MAP */
 const map = L.map('map', {
     minZoom: 2,
-    maxZoom: 17,
+    maxZoom: 17
 }).setView([52.135, -0.47], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-/* GEOCODE + PLOT */
+
+/* GEOCODE + plot */
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -250,4 +244,3 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
-
