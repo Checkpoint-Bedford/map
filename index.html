@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <title>CHECKPOINT | Bedford Support Map</title>
 
-<!-- Fixes zoom behaviour without breaking layout -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -39,7 +38,7 @@
         border-radius: 10px;
         padding: 12px 14px;
         box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-        border: 2px solid black; /* thin black cartoon line */
+        border: 2px solid black;
         z-index: 9999;
         font-size: 13px;
     }
@@ -51,32 +50,32 @@
         right: 20px;
         background: #1e3a8a;
         color: white;
-        border: 2px solid black; /* cartoon outline */
+        border: 2px solid black;
         padding: 12px 16px;
         border-radius: 10px;
         cursor: pointer;
         font-size: 15px;
         box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-        z-index: 999999 !important;
+        z-index: 999999;
     }
 
     /* Phone Panel */
     .phone-panel {
         position: fixed;
         top: 0;
-        right: -320px; /* Hidden off-screen */
+        right: -320px;
         width: 280px;
         height: 100vh;
-        background: #fff7f7; /* light pastel pink */
-        border-left: 3px solid black; /* thin cartoon edge */
+        background: #fff2f2;
+        border-left: 3px solid black;
         box-shadow: -3px 0 8px rgba(0,0,0,0.3);
         padding: 20px;
         transition: right 0.35s ease;
-        z-index: 999999 !important;
+        z-index: 999999;
     }
 
     .phone-panel.open {
-        right: 0; /* slide in */
+        right: 0;
     }
 
     .panel-close {
@@ -105,18 +104,16 @@
 
 <div class="legend">
     <b>Legend</b><br><br>
-    <i style="color:#ff9b9b;">●</i> Help Centres<br>
-    <i style="color:#9bb8ff;">●</i> Mental Health & Wellbeing<br>
-    <i style="color:#9bffb0;">●</i> Education & Youth<br>
-    <i style="color:#d7a4ff;">●</i> Diverse Centres<br>
-    <i style="color:#a7e5e8;">●</i> Outdoor Wellbeing<br>
-    <i style="color:#ffd59b;">●</i> Local Services<br>
+    <i style="color:#ff6b6b;">●</i> Help Centres<br>
+    <i style="color:#6f9dff;">●</i> Mental Health & Wellbeing<br>
+    <i style="color:#52e27a;">●</i> Education & Youth<br>
+    <i style="color:#c176ff;">●</i> Diverse Centres<br>
+    <i style="color:#63d6db;">●</i> Outdoor Wellbeing<br>
+    <i style="color:#ffb55a;">●</i> Local Services<br>
 </div>
 
-<!-- Button -->
 <button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
 
-<!-- Panel -->
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
@@ -129,7 +126,7 @@
 </div>
 
 <script>
-// Toggle panel (THIS NOW WORKS)
+// Phone panel toggle
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
@@ -139,17 +136,17 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Pastel category colours
+// Stronger colours
 const pastel = {
-    "Help Centre": "#ff9b9b",
-    "Wellbeing": "#9bb8ff",
-    "Education": "#9bffb0",
-    "Diverse": "#d7a4ff",
-    "Outdoor Wellbeing": "#a7e5e8",
-    "Local Service": "#ffd59b"
+    "Help Centre": "#ff6b6b",
+    "Wellbeing": "#6f9dff",
+    "Education": "#52e27a",
+    "Diverse": "#c176ff",
+    "Outdoor Wellbeing": "#63d6db",
+    "Local Service": "#ffb55a"
 };
 
-// Cartoon icons (slightly smaller)
+// Cartoon icon
 function cartoonIcon(color) {
     return L.divIcon({
         html: `
@@ -224,9 +221,11 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
-          .bindPopup(`<b>${name}</b><br>${postcode}`)
-          .addTo(map);
+        L.marker([lat, lon], {
+            icon: cartoonIcon(pastel[category])
+        })
+        .bindPopup(`<b>${name}</b><br>${postcode}`)
+        .addTo(map);
     });
 });
 </script>
