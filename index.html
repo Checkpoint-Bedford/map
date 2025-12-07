@@ -150,7 +150,7 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Darker, matching marker colours
+// Dark, matching marker colours
 const pastel = {
     "Help Centre": "#d62828",
     "Wellbeing": "#1d4ed8",
@@ -233,7 +233,11 @@ fetch("https://api.postcodes.io/postcodes", {
         L.marker([lat, lon], {
             icon: cartoonIcon(pastel[category])
         })
-        .bindPopup(`<b>${name}</b><br>${postcode}`)
+        .bindPopup(`
+            <b>${name}</b><br>
+            ${postcode}<br>
+            <span style="color:#555; font-style:italic;">(add description here)</span>
+        `)
         .addTo(map);
     });
 });
@@ -241,4 +245,3 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
-
