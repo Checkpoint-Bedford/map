@@ -23,18 +23,20 @@
 
         #map { height: calc(100vh - 70px); width: 100%; }
 
+        /* ----- LEGEND (smaller now) ----- */
         .legend {
             position: fixed;
             bottom: 20px;
             left: 20px;
             background: white;
             border-radius: 10px;
-            padding: 15px 18px;
+            padding: 12px 14px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.25);
             z-index: 9999;
-            font-size: 16px;
+            font-size: 14px;
         }
 
+        /* ----- PHONE BUTTON ----- */
         .phone-btn {
             position: fixed;
             top: 90px;
@@ -42,42 +44,50 @@
             background: #1e3a8a;
             color: white;
             border: none;
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 17px;
             z-index: 10000;
             box-shadow: 0 3px 6px rgba(0,0,0,0.25);
         }
 
+        /* ----- PHONE PANEL (fixed sticking out) ----- */
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -350px;
+            right: -100%;  /* fully hidden off-screen now */
             width: 300px;
+            max-width: 80vw;
             height: 100vh;
             background: #ffffff;
             box-shadow: -3px 0 8px rgba(0,0,0,0.3);
-            padding: 25px;
+            padding: 20px;
             transition: right 0.35s ease;
             z-index: 10001;
-            font-size: 18px;
+            font-size: 17px;
         }
 
         .phone-panel.open { right: 0; }
-        .panel-close { float: right; cursor: pointer; font-size: 22px; }
 
+        .panel-close {
+            float: right;
+            cursor: pointer;
+            font-size: 22px;
+        }
+
+        /* ----- MOBILE TWEAKS ----- */
         @media (max-width: 600px) {
-            .legend { font-size: 18px; }
-            .phone-btn { font-size: 20px; }
-            .phone-panel { width: 85%; font-size: 20px; }
+            .legend { font-size: 15px; }
+            .phone-btn { font-size: 18px; padding: 13px 20px; }
+            .phone-panel { font-size: 18px; }
         }
     </style>
 </head>
 
 <body>
 
-<header>Bedford Support Map <span class="brand-tag">by CHECKPOINT</span></header>
+<header>Bedford Support Map</header>
 
 <div id="map"></div>
 
@@ -109,10 +119,8 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-/* --------- BIGGER CUSTOM MARKERS ---------- */
-
+/* ---------- BIG MARKERS ---------- */
 function bigMarker(color) {
-    // SVG pin with large size
     return L.divIcon({
         className: "",
         html: `
@@ -125,10 +133,10 @@ function bigMarker(color) {
     });
 }
 
-/* --------- MAP WITH ZOOM LOCK --------- */
+/* ---------- MAP WITH LOOSER ZOOM LIMIT ---------- */
 const map = L.map('map', {
     minZoom: 11,
-    maxZoom: 14,   // 🚫 no zooming beyond this level
+    maxZoom: 17,   // <-- stops zooming later, not so restrictive
     zoomControl: true
 }).setView([52.135, -0.47], 12);
 
@@ -136,7 +144,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-/* --------- LOCATION DATA --------- */
+/* ---------- LOCATIONS ---------- */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -180,9 +188,9 @@ const colors = {
     "Local Service": "orange"
 };
 
-/* --------- GEOCODING --------- */
 const postcodes = locations.map(l => l[1]);
 
+/* ---------- GEOCODE ---------- */
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -196,18 +204,16 @@ fetch("https://api.postcodes.io/postcodes", {
         const name = locations[i][0];
         const postcode = locations[i][1];
         const category = locations[i][2];
+
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], {
-            icon: bigMarker(colors[category])
-        })
-        .bindPopup(`<b>${name}</b><br>${postcode}`)
-        .addTo(map);
+        L.marker([lat, lon], { icon: bigMarker(colors[category]) })
+            .bindPopup(`<b>${name}</b><br>${postcode}`)
+            .addTo(map);
     });
 });
 </script>
 
 </body>
 </html>
-
