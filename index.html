@@ -13,6 +13,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
+            overscroll-behavior: none; /* STOP iOS sliding the panel back open */
         }
 
         header {
@@ -29,7 +30,6 @@
             width: 100%;
         }
 
-        /* Legend (scaled down a bit) */
         .legend {
             position: fixed;
             bottom: 40px;
@@ -42,7 +42,6 @@
             font-size: 13px;
         }
 
-        /* Phone button */
         .phone-btn {
             position: fixed;
             top: 90px;
@@ -58,7 +57,6 @@
             z-index: 10000;
         }
 
-        /* Slide-out phone panel — FIXED so it doesn’t stick out */
         .phone-panel {
             position: fixed;
             top: 0;
@@ -123,16 +121,33 @@
 </div>
 
 <script>
+/* FIX: prevent panel re-opening accidentally */
+let panelLocked = false;
+
 function togglePhonePanel() {
-    document.getElementById("phonePanel").classList.toggle("open");
+    const panel = document.getElementById("phonePanel");
+
+    if (!panel.classList.contains("open")) {
+        panel.classList.add("open");
+        panelLocked = false;
+    } else {
+        panel.classList.remove("open");
+        panelLocked = true;
+        setTimeout(() => panelLocked = false, 600);
+    }
 }
 
-/* 🔵 STOP annoying zoom-in on mobile — but allow zoom OUT */
+document.addEventListener("touchstart", () => {
+    if (panelLocked) return;
+});
+
+/* Disable pinch zoom only for zooming IN */
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-/* LOCATION DATA */
+/* ------------------------------------------- */
+/* DATA */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -176,18 +191,31 @@ const colourMap = {
     "Local Service": "orange"
 };
 
+/* CARTOON MARKER SVG */
+function cartoonIcon(color) {
+    return L.divIcon({
+        html: `
+            <svg width="34" height="34" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="6"/>
+            </svg>
+        `,
+        className: "",
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+    });
+}
+
 /* MAP */
 const map = L.map('map', {
-    zoomControl: true,
-    minZoom: 2,   // allow full zoom OUT
-    maxZoom: 17   // reasonable upper limit
+    minZoom: 2,
+    maxZoom: 17,
 }).setView([52.135, -0.47], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-/* GEOCODE + POPUPS */
+/* GEOCODE + PLOT */
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -207,13 +235,8 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        /* BIG icons */
-        L.circleMarker([lat, lon], {
-            radius: 12,
-            color: colourMap[category],
-            fillColor: colourMap[category],
-            fillOpacity: 0.9,
-            weight: 3
+        L.marker([lat, lon], {
+            icon: cartoonIcon(colourMap[category])
         })
         .bindPopup(`
             <b>${name}</b><br>
