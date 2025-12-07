@@ -4,13 +4,16 @@
     <meta charset="utf-8">
     <title>CHECKPOINT | Bedford Support Map</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
         header {
             background: #1e3a8a;
@@ -21,22 +24,25 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        #map { height: calc(100vh - 70px); width: 100%; }
-
-        /* ----- LEGEND (smaller now) ----- */
-        .legend {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: white;
-            border-radius: 10px;
-            padding: 12px 14px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-            z-index: 9999;
-            font-size: 14px;
+        #map {
+            height: calc(100vh - 70px);
+            width: 100%;
         }
 
-        /* ----- PHONE BUTTON ----- */
+        /* Legend (scaled down a bit) */
+        .legend {
+            position: fixed;
+            bottom: 40px;
+            left: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+            z-index: 9999;
+            font-size: 13px;
+        }
+
+        /* Phone button */
         .phone-btn {
             position: fixed;
             top: 90px;
@@ -45,59 +51,61 @@
             color: white;
             border: none;
             padding: 12px 18px;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 17px;
-            z-index: 10000;
+            font-size: 16px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+            z-index: 10000;
         }
 
-        /* ----- PHONE PANEL (fixed sticking out) ----- */
+        /* Slide-out phone panel — FIXED so it doesn’t stick out */
         .phone-panel {
             position: fixed;
             top: 0;
-            right: -100%;  /* fully hidden off-screen now */
+            right: -320px;
             width: 300px;
-            max-width: 80vw;
             height: 100vh;
             background: #ffffff;
             box-shadow: -3px 0 8px rgba(0,0,0,0.3);
             padding: 20px;
             transition: right 0.35s ease;
             z-index: 10001;
-            font-size: 17px;
         }
 
-        .phone-panel.open { right: 0; }
+        .phone-panel.open {
+            right: 0;
+        }
 
         .panel-close {
             float: right;
             cursor: pointer;
-            font-size: 22px;
+            font-size: 18px;
+            margin-top: -5px;
         }
 
-        /* ----- MOBILE TWEAKS ----- */
-        @media (max-width: 600px) {
-            .legend { font-size: 15px; }
-            .phone-btn { font-size: 18px; padding: 13px 20px; }
-            .phone-panel { font-size: 18px; }
+        .brand-tag {
+            font-size: 12px;
+            color: #d1d5db;
+            margin-left: 10px;
+            font-weight: normal;
         }
     </style>
 </head>
 
 <body>
-
-<header>Bedford Support Map</header>
+<header>
+    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
+</header>
 
 <div id="map"></div>
 
 <div class="legend">
     <b>Legend</b><br><br>
     <i style='color:red;'>●</i> Help Centres<br>
-    <i style='color:blue;'>●</i> Wellbeing<br>
-    <i style='color:green;'>●</i> Education<br>
-    <i style='color:purple;'>●</i> Diverse<br>
-    <i style='color:cadetblue;'>●</i> Outdoor<br>
+    <i style='color:blue;'>●</i> Mental Health & Wellbeing<br>
+    <i style='color:green;'>●</i> Education & Youth<br>
+    <i style='color:purple;'>●</i> Diverse Centres<br>
+    <i style='color:cadetblue;'>●</i> Outdoor Wellbeing<br>
     <i style='color:orange;'>●</i> Local Services<br>
 </div>
 
@@ -119,32 +127,12 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-/* ---------- BIG MARKERS ---------- */
-function bigMarker(color) {
-    return L.divIcon({
-        className: "",
-        html: `
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="${color}" stroke="black" stroke-width="1.2">
-                <circle cx="12" cy="12" r="10"></circle>
-            </svg>
-        `,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
-    });
-}
+/* 🔵 STOP annoying zoom-in on mobile — but allow zoom OUT */
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("gesturechange", e => e.preventDefault());
+document.addEventListener("gestureend", e => e.preventDefault());
 
-/* ---------- MAP WITH LOOSER ZOOM LIMIT ---------- */
-const map = L.map('map', {
-    minZoom: 11,
-    maxZoom: 17,   // <-- stops zooming later, not so restrictive
-    zoomControl: true
-}).setView([52.135, -0.47], 12);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-/* ---------- LOCATIONS ---------- */
+/* LOCATION DATA */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -166,11 +154,11 @@ const locations = [
     ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
     ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
 
-    ["Russell Park", "MK40 3SA", "Outdoor"],
-    ["Priory Country Park", "MK41 9DJ", "Outdoor"],
-    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor"],
-    ["Sandy Sports Centre", "SG19 1BL", "Outdoor"],
-    ["Addison Howard Park", "MK42 8PN", "Outdoor"],
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
+    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing"],
+    ["Sandy Sports Centre", "SG19 1BL", "Outdoor Wellbeing"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
 
     ["De Parys Medical Group", "MK40 2TX", "Local Service"],
     ["Priory Health Clinic", "MK41 6GA", "Local Service"],
@@ -179,24 +167,35 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-const colors = {
+const colourMap = {
     "Help Centre": "red",
     "Wellbeing": "blue",
     "Education": "green",
     "Diverse": "purple",
-    "Outdoor": "cadetblue",
+    "Outdoor Wellbeing": "cadetblue",
     "Local Service": "orange"
 };
 
+/* MAP */
+const map = L.map('map', {
+    zoomControl: true,
+    minZoom: 2,   // allow full zoom OUT
+    maxZoom: 17   // reasonable upper limit
+}).setView([52.135, -0.47], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+/* GEOCODE + POPUPS */
 const postcodes = locations.map(l => l[1]);
 
-/* ---------- GEOCODE ---------- */
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ postcodes })
 })
-.then(r => r.json())
+.then(res => res.json())
 .then(data => {
     data.result.forEach((entry, i) => {
         if (!entry.result) return;
@@ -208,12 +207,24 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], { icon: bigMarker(colors[category]) })
-            .bindPopup(`<b>${name}</b><br>${postcode}`)
-            .addTo(map);
+        /* BIG icons */
+        L.circleMarker([lat, lon], {
+            radius: 12,
+            color: colourMap[category],
+            fillColor: colourMap[category],
+            fillOpacity: 0.9,
+            weight: 3
+        })
+        .bindPopup(`
+            <b>${name}</b><br>
+            ${postcode}<br>
+            <span style="color:#555; font-style:italic;">(description goes here)</span>
+        `)
+        .addTo(map);
     });
 });
 </script>
 
 </body>
 </html>
+
