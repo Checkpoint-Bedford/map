@@ -29,7 +29,6 @@
         width: 100%;
     }
 
-    /* Legend */
     .legend {
         position: fixed;
         bottom: 40px;
@@ -43,7 +42,6 @@
         font-size: 13px;
     }
 
-    /* Phone Button */
     .phone-btn {
         position: fixed;
         top: 90px;
@@ -59,7 +57,6 @@
         z-index: 999999;
     }
 
-    /* Phone Panel */
     .phone-panel {
         position: fixed;
         top: 0;
@@ -103,7 +100,7 @@
 <div id="map"></div>
 
 <div class="legend">
-    <b>Legend</b><br><br>
+    <b>Index</b><br><br>
     <i style="color:#ff6b6b;">●</i> Help Centres<br>
     <i style="color:#6f9dff;">●</i> Mental Health & Wellbeing<br>
     <i style="color:#52e27a;">●</i> Education & Youth<br>
@@ -112,7 +109,7 @@
     <i style="color:#ffb55a;">●</i> Local Services<br>
 </div>
 
-<button class="phone-btn" onclick="togglePhonePanel()">📞 Phone Numbers</button>
+<button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
 
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
@@ -126,17 +123,15 @@
 </div>
 
 <script>
-// Phone panel toggle
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-// Disable pinch zoom-in
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Stronger colours
+    
 const pastel = {
     "Help Centre": "#ff6b6b",
     "Wellbeing": "#6f9dff",
@@ -146,7 +141,6 @@ const pastel = {
     "Local Service": "#ffb55a"
 };
 
-// Cartoon icon
 function cartoonIcon(color) {
     return L.divIcon({
         html: `
@@ -163,7 +157,7 @@ function cartoonIcon(color) {
     });
 }
 
-// Map
+
 const map = L.map("map", { maxZoom: 16 })
 .setView([52.135, -0.47], 12);
 
@@ -171,14 +165,12 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// Data
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
     ["BRASS Bedford", "MK40 2RB", "Help Centre"],
     ["Kings Arm Project", "MK42 9AZ", "Help Centre"],
     ["SMART First Point Bedford", "MK40 3HZ", "Help Centre"],
-    ["Beds Domestic & Sexual Abuse Partnership", "SG1 5TQ", "Help Centre"],
     ["Job Centre Plus", "MK40 2EH", "Help Centre"],
 
     ["CAMHS", "MK42 9DJ", "Wellbeing"],
@@ -196,7 +188,6 @@ const locations = [
     ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
     ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
     ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing"],
-    ["Sandy Sports Centre", "SG19 1BL", "Outdoor Wellbeing"],
     ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
 
     ["De Parys Medical Group", "MK40 2TX", "Local Service"],
@@ -206,7 +197,6 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-// Geocode
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
