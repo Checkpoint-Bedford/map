@@ -10,10 +10,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+        body { margin: 0; font-family: Arial, sans-serif; }
 
         header {
             background: #1e3a8a;
@@ -24,12 +21,8 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        #map {
-            height: calc(100vh - 70px);
-            width: 100%;
-        }
+        #map { height: calc(100vh - 70px); width: 100%; }
 
-        /* Legend */
         .legend {
             position: fixed;
             bottom: 20px;
@@ -42,7 +35,6 @@
             font-size: 16px;
         }
 
-        /* Floating button */
         .phone-btn {
             position: fixed;
             top: 90px;
@@ -54,15 +46,10 @@
             border-radius: 10px;
             cursor: pointer;
             font-size: 18px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
             z-index: 10000;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
         }
 
-        .phone-btn:hover {
-            background: #274bb8;
-        }
-
-        /* Slide-out phone panel */
         .phone-panel {
             position: fixed;
             top: 0;
@@ -74,69 +61,33 @@
             padding: 25px;
             transition: right 0.35s ease;
             z-index: 10001;
-            font-size: 17px;
+            font-size: 18px;
         }
 
-        .phone-panel.open {
-            right: 0;
-        }
+        .phone-panel.open { right: 0; }
+        .panel-close { float: right; cursor: pointer; font-size: 22px; }
 
-        .panel-close {
-            float: right;
-            cursor: pointer;
-            font-size: 22px;
-            margin-top: -5px;
-        }
-
-        .brand-tag {
-            font-size: 13px;
-            color: #d1d5db;
-            margin-left: 10px;
-            font-weight: normal;
-        }
-
-        /* 📱 MOBILE FIXES */
         @media (max-width: 600px) {
-            header {
-                font-size: 20px;
-                padding: 12px 15px;
-            }
-            .brand-tag {
-                font-size: 11px;
-            }
-            .legend {
-                font-size: 18px;
-                padding: 16px;
-                bottom: 15px;
-                left: 15px;
-            }
-            .phone-btn {
-                font-size: 20px;
-                padding: 16px 22px;
-                right: 15px;
-            }
-            .phone-panel {
-                width: 85%;
-                font-size: 19px;
-            }
+            .legend { font-size: 18px; }
+            .phone-btn { font-size: 20px; }
+            .phone-panel { width: 85%; font-size: 20px; }
         }
     </style>
 </head>
 
 <body>
-<header>
-    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
-</header>
+
+<header>Bedford Support Map <span class="brand-tag">by CHECKPOINT</span></header>
 
 <div id="map"></div>
 
 <div class="legend">
     <b>Legend</b><br><br>
     <i style='color:red;'>●</i> Help Centres<br>
-    <i style='color:blue;'>●</i> Mental Health & Wellbeing<br>
-    <i style='color:green;'>●</i> Education & Youth<br>
-    <i style='color:purple;'>●</i> Diverse Centres<br>
-    <i style='color:cadetblue;'>●</i> Outdoor Wellbeing<br>
+    <i style='color:blue;'>●</i> Wellbeing<br>
+    <i style='color:green;'>●</i> Education<br>
+    <i style='color:purple;'>●</i> Diverse<br>
+    <i style='color:cadetblue;'>●</i> Outdoor<br>
     <i style='color:orange;'>●</i> Local Services<br>
 </div>
 
@@ -150,8 +101,6 @@
         <li>Bedford Foodbank — <b>00000 000000</b></li>
         <li>Mental Health Support — <b>00000 000000</b></li>
         <li>Emergency Services — <b>999</b></li>
-        <br>
-        <li>(add more as needed)</li>
     </ul>
 </div>
 
@@ -160,16 +109,34 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
-/* MAP with max zoom limit */
+/* --------- BIGGER CUSTOM MARKERS ---------- */
+
+function bigMarker(color) {
+    // SVG pin with large size
+    return L.divIcon({
+        className: "",
+        html: `
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="${color}" stroke="black" stroke-width="1.2">
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+        `,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+    });
+}
+
+/* --------- MAP WITH ZOOM LOCK --------- */
 const map = L.map('map', {
-    maxZoom: 15   // prevents zooming beyond ~300%
+    minZoom: 11,
+    maxZoom: 14,   // 🚫 no zooming beyond this level
+    zoomControl: true
 }).setView([52.135, -0.47], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-/* LOCATION DATA */
+/* --------- LOCATION DATA --------- */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
@@ -191,11 +158,11 @@ const locations = [
     ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
     ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
 
-    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
-    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
-    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing"],
-    ["Sandy Sports Centre", "SG19 1BL", "Outdoor Wellbeing"],
-    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
+    ["Russell Park", "MK40 3SA", "Outdoor"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor"],
+    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor"],
+    ["Sandy Sports Centre", "SG19 1BL", "Outdoor"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor"],
 
     ["De Parys Medical Group", "MK40 2TX", "Local Service"],
     ["Priory Health Clinic", "MK41 6GA", "Local Service"],
@@ -204,15 +171,16 @@ const locations = [
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
 ];
 
-const colourMap = {
+const colors = {
     "Help Centre": "red",
     "Wellbeing": "blue",
     "Education": "green",
     "Diverse": "purple",
-    "Outdoor Wellbeing": "cadetblue",
+    "Outdoor": "cadetblue",
     "Local Service": "orange"
 };
 
+/* --------- GEOCODING --------- */
 const postcodes = locations.map(l => l[1]);
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -220,7 +188,7 @@ fetch("https://api.postcodes.io/postcodes", {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ postcodes })
 })
-.then(res => res.json())
+.then(r => r.json())
 .then(data => {
     data.result.forEach((entry, i) => {
         if (!entry.result) return;
@@ -228,17 +196,13 @@ fetch("https://api.postcodes.io/postcodes", {
         const name = locations[i][0];
         const postcode = locations[i][1];
         const category = locations[i][2];
-
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.circleMarker([lat, lon], {
-            radius: 7,
-            color: colourMap[category],
-            fillColor: colourMap[category],
-            fillOpacity: 0.85
+        L.marker([lat, lon], {
+            icon: bigMarker(colors[category])
         })
-        .bindPopup(`<b>${name}</b><br>${postcode}<br><span style="color:#555; font-style:italic;">(description goes here)</span>`)
+        .bindPopup(`<b>${name}</b><br>${postcode}`)
         .addTo(map);
     });
 });
