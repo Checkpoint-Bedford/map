@@ -227,4 +227,24 @@ fetch("https://api.postcodes.io/postcodes", {
 .then(res => res.json())
 .then(data => {
     data.result.forEach((entry, i) => {
-        if (!entry.result) retu
+        if (!entry.result) return;
+
+        const name = locations[i][0];
+        const postcode = locations[i][1];
+        const category = locations[i][2];
+        const color = colours[category];
+
+        const lat = entry.result.latitude;
+        const lon = entry.result.longitude;
+
+        L.marker([lat, lon], { icon: cartoonIcon(color) })
+        .bindPopup(`<b>${name}</b><br>${postcode}`)
+        .addTo(map);
+    });
+});
+</script>
+
+</body>
+</html>
+
+        
