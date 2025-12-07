@@ -150,7 +150,7 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Dark, matching marker colours
+// Marker colors
 const pastel = {
     "Help Centre": "#d62828",
     "Wellbeing": "#1d4ed8",
@@ -183,37 +183,38 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
+// Locations array with a separate description field for each
 const locations = [
-    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
-    ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
-    ["BRASS Bedford", "MK40 2RB", "Help Centre"],
-    ["Kings Arm Project", "MK42 9AZ", "Help Centre"],
-    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre"],
-    ["Job Centre Plus", "MK40 2EH", "Help Centre"],
+    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
+    ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
+    ["BRASS Bedford", "MK40 2RB", "Help Centre", "(add description here)"],
+    ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
+    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
+    ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
 
-    ["CAMHS", "MK42 9DJ", "Wellbeing"],
-    ["Queen’s Park Family Hub", "MK40 4LE", "Wellbeing"],
-    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing"],
+    ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
+    ["Queen’s Park Family Hub", "MK40 4LE", "Wellbeing", "(add description here)"],
+    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
 
-    ["Bedford Central Library", "MK40 1PG", "Education"],
-    ["Kempston Library", "MK42 8AT", "Education"],
-    ["Wootton Library", "MK43 9LH", "Education"],
-    ["YMCA Bedfordshire", "MK40 2AA", "Education"],
+    ["Bedford Central Library", "MK40 1PG", "Education", "(add description here)"],
+    ["Kempston Library", "MK42 8AT", "Education", "(add description here)"],
+    ["Wootton Library", "MK43 9LH", "Education", "(add description here)"],
+    ["YMCA Bedfordshire", "MK40 2AA", "Education", "(add description here)"],
 
-    ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
-    ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
+    ["Bedford Creative Arts", "MK41 7PH", "Diverse", "(add description here)"],
+    ["Higgins Museum Bedford", "MK40 3XD", "Diverse", "(add description here)"],
 
-    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
-    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
-    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing"],
-    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing", "(add description here)"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing", "(add description here)"],
+    ["Flitwick Leisure Centre", "MK45 1TH", "Outdoor Wellbeing", "(add description here)"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing", "(add description here)"],
 
-    ["De Parys Medical Group", "MK40 2TX", "Local Service"],
-    ["Priory Health Clinic", "MK41 6GA", "Local Service"],
-    ["Queen’s Park Surgery", "MK40 4HR", "Local Service"],
-    ["London Road Surgery", "MK42 0NT", "Local Service"],
-    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"],
-    ["Icash", "MK42 0AH", "Local Service"]
+    ["De Parys Medical Group", "MK40 2TX", "Local Service", "(add description here)"],
+    ["Priory Health Clinic", "MK41 6GA", "Local Service", "(add description here)"],
+    ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
+    ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
+    ["Icash", "MK42 0AH", "Local Service", "(add description here)"]
 ];
 
 fetch("https://api.postcodes.io/postcodes", {
@@ -226,7 +227,7 @@ fetch("https://api.postcodes.io/postcodes", {
     data.result.forEach((entry, i) => {
         if (!entry.result) return;
 
-        const [name, postcode, category] = locations[i];
+        const [name, postcode, category, description] = locations[i];
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
@@ -236,7 +237,7 @@ fetch("https://api.postcodes.io/postcodes", {
         .bindPopup(`
             <b>${name}</b><br>
             ${postcode}<br>
-            <span style="color:#555; font-style:italic;">(add description here)</span>
+            <span style="color:#555; font-style:italic;">${description}</span>
         `)
         .addTo(map);
     });
