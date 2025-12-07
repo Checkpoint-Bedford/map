@@ -122,7 +122,7 @@
         <li>SMART First Point Bedford: <b>01234 365955</b></li>
         <li>King's Arm Project: <b>01234 350900</b></li>
         <br>
-        <li>CAMHS Bedford: <b>01234 893300/b></li>
+        <li>CAMHS Bedford: <b>01234 893300</b></li>
         <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
         <li>Queen's Park Family Hub: <b>0300 323 0245</b></li>
         <br>
@@ -137,7 +137,7 @@
         <li>De Parys Medical Group: <b>01234 351341</b></li>
         <li>Priory Health Clinic: <b>01234 262040</b></li>
         <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
-        <li>Beds Fire & Rescue Group: <br>01234 845000</b></li>
+        <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
     </ul>
 </div>
 
@@ -150,7 +150,6 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-    
 const pastel = {
     "Help Centre": "#ff6b6b",
     "Wellbeing": "#6f9dff",
@@ -175,7 +174,6 @@ function cartoonIcon(color) {
         iconAnchor: [14, 14]
     });
 }
-
 
 const map = L.map("map", { maxZoom: 16 })
 .setView([52.135, -0.47], 12);
@@ -213,7 +211,7 @@ const locations = [
     ["Priory Health Clinic", "MK41 6GA", "Local Service"],
     ["Queen’s Park Surgery", "MK40 4HR", "Local Service"],
     ["London Road Surgery", "MK42 0NT", "Local Service"],
-    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"]
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"],
     ["Icash", "MK42 0AH", "Local Service"]
 ];
 
@@ -242,4 +240,3 @@ fetch("https://api.postcodes.io/postcodes", {
 
 </body>
 </html>
-
