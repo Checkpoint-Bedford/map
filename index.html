@@ -26,18 +26,48 @@
         height: calc(100vh - 70px);
         width: 100%;
     }
-    .legend {
+
+    /* Search bar */
+    .search-box {
         position: fixed;
-        bottom: 40px;
+        top: 85px;
         left: 20px;
-        background: #ffffff;
-        border-radius: 10px;
-        padding: 12px 14px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-        border: 2px solid black;
-        z-index: 9999;
-        font-size: 13px;
+        width: 260px;
+        z-index: 999999;
     }
+    @media(max-width: 600px) {
+        .search-box {
+            top: 140px; /* moves down so it never overlaps */
+        }
+    }
+    .search-input {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 20px;
+        border: 2px solid #1e3a8a;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        font-size: 15px;
+        outline: none;
+    }
+    .search-results {
+        background: white;
+        border-radius: 15px;
+        margin-top: 5px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+        overflow: hidden;
+        border: 2px solid #1e3a8a;
+        display: none;
+    }
+    .search-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid #ddd;
+    }
+    .search-item:hover {
+        background: #eef2ff;
+    }
+
+    /* Phone button */
     .phone-btn {
         position: fixed;
         top: 90px;
@@ -52,19 +82,21 @@
         box-shadow: 0 3px 6px rgba(0,0,0,0.25);
         z-index: 999999;
     }
+
+    /* Phone panel */
     .phone-panel {
         position: fixed;
         top: 0;
         right: -320px;
         width: 280px;
         height: 100vh;
+        overflow-y: auto;
         background: #fff2f2;
         border-left: 3px solid black;
         box-shadow: -3px 0 8px rgba(0,0,0,0.3);
         padding: 20px;
         transition: right 0.35s ease;
         z-index: 999999;
-        overflow-y: auto;
     }
     .phone-panel.open {
         right: 0;
@@ -75,49 +107,19 @@
         font-size: 18px;
         margin-top: -5px;
     }
-    .brand-tag {
-        font-size: 12px;
-        color: #d1d5db;
-        margin-left: 10px;
-        font-weight: normal;
-    }
-
-    /* Search bar styles */
-    .search-container {
-        position: fixed;
-        top: 90px;
-        left: 20px;
-        z-index: 999999;
-        background: white;
-        padding: 5px;
-        border: 2px solid #1e3a8a;
-        border-radius: 5px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-    }
-    .search-input {
-        width: 200px;
-        padding: 4px 6px;
-        font-size: 14px;
-    }
 </style>
 </head>
-
 <body>
-
 <header>
     Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
 </header>
 
 <div id="map"></div>
 
-<div class="legend">
-    <b>Index</b><br><br>
-    <i style="color:#d62828;">●</i> Help Centres<br>
-    <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
-    <i style="color:#138a36;">●</i> Education & Youth<br>
-    <i style="color:#7e22ce;">●</i> Diverse Centres<br>
-    <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
-    <i style="color:#f97316;">●</i> Local Services<br>
+<!-- SEARCH BAR -->
+<div class="search-box">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search locations...">
+    <div id="searchResults" class="search-results"></div>
 </div>
 
 <button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
@@ -125,6 +127,7 @@
 <div id="phonePanel" class="phone-panel">
     <span class="panel-close" onclick="togglePhonePanel()">✖</span>
     <h3>Useful Phone Numbers</h3>
+
     <ul>
         <li>Citizens Advice Bedford: <b>01234 867944</b></li>
         <li>Bedford Foodbank: <b>01234 268569</b></li>
@@ -155,27 +158,14 @@
         <li>Bedford Hospital: <b>01234 355122</b></li>
     </ul>
 </div>
-
-<!-- Search bar container -->
-<div class="search-container">
-    <input id="searchInput" class="search-input" list="places" placeholder="Search location..." />
-    <datalist id="places">
-        <!-- options inserted dynamically -->
-    </datalist>
-    <button onclick="goToPlace()">Go</button>
-</div>
-
 <script>
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
+
+    // Close search suggestions when panel opens
+    document.getElementById("searchResults").style.display = "none";
 }
 
-// Stop Safari zoom bug
-document.addEventListener("gesturestart", e => e.preventDefault());
-document.addEventListener("gesturechange", e => e.preventDefault());
-document.addEventListener("gestureend", e => e.preventDefault());
-
-// Marker colours
 const pastel = {
     "Help Centre": "#d62828",
     "Wellbeing": "#1d4ed8",
@@ -187,63 +177,53 @@ const pastel = {
 
 function cartoonIcon(color) {
     return L.divIcon({
-        html: `
-            <svg width="28" height="28" viewBox="0 0 100 100">
+        html: `<svg width="28" height="28" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="3"/>
-            </svg>
-        `,
+            </svg>`,
         className: "",
         iconSize: [28, 28],
         iconAnchor: [14, 14]
     });
 }
 
-const map = L.map("map", { maxZoom: 16 }).setView([52.135, -0.47], 12);
+const map = L.map("map", { maxZoom: 17 }).setView([52.135, -0.47], 12);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
 const locations = [
-    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
-    ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
-    ["BRASS Bedford", "MK40 2RB", "Help Centre", "(add description here)"],
-    ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
-    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
-    ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
-    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"],
-    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic – offers STI testing, advice & contraception"],
-
-    ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
-    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
-    ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
-    ["Path to Recovery", "MK40 2RT", "Wellbeing", "(add description here)"],
-
-    ["Bedford Central Library", "MK40 1PG", "Education", "(add description here)"],
-    ["Kempston Library", "MK42 8AT", "Education", "(add description here)"],
-    ["Wootton Library", "MK43 9LH", "Education", "(add description here)"],
-    ["YMCA Bedfordshire", "MK40 2AA", "Education", "(add description here)"],
-
-    ["Bedford Creative Arts", "MK41 7PH", "Diverse", "(add description here)"],
-    ["Higgins Museum Bedford", "MK40 3XD", "Diverse", "(add description here)"],
-
-    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing", "(add description here)"],
-    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing", "(add description here)"],
-    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing", "(add description here)"],
-
-    ["De Parys Medical Group", "MK40 2TX", "Local Service", "(add description here)"],
-    ["Priory Health Clinic", "MK41 6GA", "Local Service", "(add description here)"],
-    ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
-    ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
-    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
-    ["Putnoe Medical Centre", "MK41 9JE", "Local Service", "(add description here)"],
-    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
+    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
+    ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
+    ["BRASS Bedford", "MK40 2RB", "Help Centre"],
+    ["Kings Arm Project", "MK42 9AZ", "Help Centre"],
+    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre"],
+    ["Job Centre Plus", "MK40 2EH", "Help Centre"],
+    ["Bedford Hospital", "MK42 9DJ", "Help Centre"],
+    ["iCaSH Bedford", "MK42 0AH", "Local Service"],
+    ["CAMHS", "MK42 9DJ", "Wellbeing"],
+    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing"],
+    ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing"],
+    ["Path to Recovery", "MK40 2RT", "Wellbeing"],
+    ["Bedford Central Library", "MK40 1PG", "Education"],
+    ["Kempston Library", "MK42 8AT", "Education"],
+    ["Wootton Library", "MK43 9LH", "Education"],
+    ["YMCA Bedfordshire", "MK40 2AA", "Education"],
+    ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
+    ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
+    ["De Parys Medical Group", "MK40 2TX", "Local Service"],
+    ["Priory Health Clinic", "MK41 6GA", "Local Service"],
+    ["Queen’s Park Surgery", "MK40 4HR", "Local Service"],
+    ["London Road Surgery", "MK42 0NT", "Local Service"],
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"],
+    ["Putnoe Medical Centre", "MK41 9JE", "Local Service"],
+    ["Bedford Borough Social Services", "MK42 9AP", "Local Service"]
 ];
 
-// Will store { name, lat, lon }
-const placeIndex = [];
+// MARKERS
+let markerRefs = [];
 
-// Fetch postcode coords
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -254,46 +234,44 @@ fetch("https://api.postcodes.io/postcodes", {
     data.result.forEach((entry, i) => {
         if (!entry.result) return;
 
-        const [name, postcode, category, description] = locations[i];
+        const [name, postcode, category] = locations[i];
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        // Add marker
-        L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
-            .bindPopup(`
-                <b>${name}</b><br>
-                ${postcode}<br>
-                <span style="color:#555; font-style:italic;">${description}</span>
-            `)
+        const marker = L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
+            .bindPopup(`<b>${name}</b><br>${postcode}`)
             .addTo(map);
 
-        // Add to search index
-        placeIndex.push({ name, lat, lon });
+        markerRefs.push({ name, lat, lon, marker });
     });
-
-    // Once done, populate the datalist for the search box
-    const datalist = document.getElementById("places");
-    placeIndex.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.name;
-        datalist.appendChild(opt);
-    });
-})
-.catch(err => {
-    console.error("Error fetching postcodes:", err);
 });
 
-function goToPlace() {
-    const input = document.getElementById("searchInput");
-    const name = input.value;
-    const place = placeIndex.find(p => p.name === name);
-    if (place) {
-        map.setView([place.lat, place.lon], 14);
-    } else {
-        alert("Location not found — please pick from list.");
-    }
-}
-</script>
+// SEARCH
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
 
+searchInput.addEventListener("input", () => {
+    const v = searchInput.value.toLowerCase().trim();
+    if (v === "") {
+        searchResults.style.display = "none";
+        return;
+    }
+
+    const matches = markerRefs.filter(l => l.name.toLowerCase().includes(v));
+    searchResults.innerHTML = matches.map(m => `<div class='search-item'>${m.name}</div>`).join("");
+
+    searchResults.style.display = matches.length ? "block" : "none";
+
+    document.querySelectorAll(".search-item").forEach((item, index) => {
+        item.onclick = () => {
+            const picked = matches[index];
+            map.setView([picked.lat, picked.lon], 16);
+            picked.marker.openPopup();
+            searchResults.style.display = "none";
+            searchInput.value = picked.name;
+        };
+    });
+});
+</script>
 </body>
 </html>
