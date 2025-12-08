@@ -13,267 +13,433 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-  :root {
+  :root{
     --primary: #1e3a8a;
-    --banner-h: 95px;   /* thinner blue panel */
-    --header-h: 55px;   /* brings title higher */
+    --banner-h: 95px;   /* thin blue area */
+    --header-h: 55px;   /* header/title height */
     --panel-w: 300px;
   }
 
-  html, body { height: 100%; margin: 0; font-family: 'Poppins', sans-serif; background:#fff; }
+  html,body{ height:100%; margin:0; font-family:'Poppins',sans-serif; background:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-  .blue-banner {
+  /* Blue banner behind header + controls */
+  .blue-banner{
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top:0; left:0; right:0;
     height: var(--banner-h);
     background: var(--primary);
-    z-index: 99996;
+    z-index: 9996;
   }
 
-  header {
+  /* Header (title) - same visual size */
+  header{
     position: fixed;
-    top: 5px;  /* moves title higher */
+    top: 6px;            /* moved slightly up */
     left: 0; right: 0;
     height: var(--header-h);
     padding-left: 18px;
-    display: flex;
-    align-items: center;
-    font-size: 21px;
-    font-weight: 700;
-    color: white;
-    z-index: 99997;
+    display:flex;
+    align-items:center;
+    color: #fff;
+    font-weight:700;
+    font-size:20px;
+    z-index: 9997;
   }
+  header .byline{ font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px; }
 
-  header .byline {
-    font-weight: 400;
-    margin-left: 10px;
-    color: #d1d5db;
-    font-size: 13px;
-  }
+  /* Map sits below the blue banner */
+  #map{ position:absolute; top: var(--banner-h); left:0; right:0; bottom:0; z-index:0; }
 
-  #map {
-    position: absolute;
-    top: var(--banner-h);
-    left: 0; right: 0; bottom: 0;
-  }
-
-  .controls-row {
+  /* Controls row under header, inside the blue banner */
+  .controls-row{
     position: fixed;
     top: var(--header-h);
-    left: 0; right: 0;
+    left:0; right:0;
     height: calc(var(--banner-h) - var(--header-h));
-    z-index: 99998;
+    z-index: 9998;
     pointer-events: none;
   }
 
-  .controls-inner {
-    height: 100%;
-    margin: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .controls-inner{
+    max-width:1200px;
+    margin:0 20px;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
     pointer-events: auto;
   }
 
-  .search-box { width: 220px; position: relative; }
-
-  .search-input {
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: 999px;
-    border: 2px solid var(--primary);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-    font-size: 14px;
+  /* Search box */
+  .search-box{ width:220px; position:relative; }
+  .search-input{
+    width:100%;
+    padding:9px 12px;
+    border-radius:999px;
+    border:2px solid var(--primary);
+    box-shadow:0 6px 14px rgba(0,0,0,0.12);
+    font-size:14px;
+    background:#fff;
+    box-sizing:border-box;
   }
 
-  .search-suggestions {
-    display: none;
-    position: absolute;
+  /* Suggestions absolutely positioned so opening them doesn't change layout */
+  .search-suggestions{
+    display:none;
+    position:absolute;
     top: calc(100% + 8px);
     left: 0;
     width: 100%;
-    background: white;
-    border-radius: 10px;
+    background: #fff;
+    border-radius: 12px;
     border: 2px solid var(--primary);
     box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    max-height: 260px;
+    overflow-y: auto;
     z-index: 100000;
   }
 
-  .suggestion {
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    border-bottom: 1px solid #eee;
+  .suggestion{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:10px 12px;
+    cursor:pointer;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+    background:#fff;
   }
+  .suggestion:last-child{ border-bottom:none; }
+  .suggestion:hover{ background:#eef2ff; }
 
-  .suggestion:hover { background:#eef2ff; }
-
-  .dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 2px solid black;
+  /* Dot circle must be true circle and never stretched */
+  .dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:2px solid #000;
+    box-sizing:border-box;
+    flex:0 0 auto; /* no stretching or shrinking */
+    display:inline-block;
+    vertical-align:middle;
   }
+  .label{ line-height:1.05; }
 
-  .phone-btn {
+  .match{ font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
+
+  /* Phone button */
+  .phone-btn{
     background: var(--primary);
     color: white;
     border: 2px solid black;
     padding: 12px 16px;
     border-radius: 28px;
-    font-weight: 600;
     cursor: pointer;
+    font-size:15px;
+    font-weight:600;
+    white-space:nowrap;
   }
 
-  /* PHONE PANEL */
-  .phone-panel {
+  /* Phone panel hidden using transform so it never peeks out */
+  .phone-panel{
     position: fixed;
-    top: 0; right: 0;
+    top: 0;
+    right: 0;
     width: var(--panel-w);
     height: 100vh;
     background: #fff2f2;
     border-left: 3px solid black;
     padding: 18px;
-    transform: translateX(100%);
-    transition: transform .3s ease;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+    transform: translateX(100%); /* fully hidden */
+    transition: transform 0.32s ease;
     z-index: 100001;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
-  .phone-panel.open { transform: translateX(0); }
+  .phone-panel.open{ transform: translateX(0); }
+  .panel-close{ float:right; cursor:pointer; font-size:18px; }
 
-  /* LEGEND FIX — push near bottom on all screens */
-  .legend {
+  /* LEGEND anchored at very bottom on all screens */
+  .legend{
     position: fixed;
     left: 20px;
-    bottom: 15px;
-    background: white;
-    padding: 10px 14px;
+    bottom: 12px; /* anchored low */
+    background: #fff;
+    padding: 8px 12px;
     border-radius: 8px;
-    border: 2px solid black;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 2px solid #000;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     z-index: 99999;
-    font-size: 12px;
+    font-size:12px;
+    line-height:1.25;
   }
 
-  @media (max-width: 480px) {
-    .legend {
-      left: 12px;
-      bottom: 12px; /* LOWER for small phones */
-      padding: 8px 12px;
-    }
+  .credit{
+    position: fixed;
+    bottom: 6px;
+    right: 8px;
+    font-size:10px;
+    color:gray;
+    opacity:0.65;
+    z-index:500;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 800px){
+    .controls-inner{ margin:0 12px; }
+    .search-box{ width:170px; }
+    .phone-btn{ padding:10px 12px; font-size:14px; }
+  }
+  @media (max-width: 480px){
+    .search-box{ width:150px; }
+    .legend{ left:10px; bottom:10px; padding:6px 10px; }
   }
 </style>
 </head>
 <body>
+  <!-- Blue banner & header -->
+  <div class="blue-banner" aria-hidden="true"></div>
 
-<div class="blue-banner"></div>
+  <header>
+    Bedford Support Map <span class="byline">by CHECKPOINT</span>
+  </header>
 
-<header>
-  Bedford Support Map <span class="byline">by CHECKPOINT</span>
-</header>
+  <!-- Controls row inside banner, under header -->
+  <div class="controls-row" aria-hidden="false">
+    <div class="controls-inner">
+      <div class="search-box">
+        <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
+        <div id="suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+      </div>
 
-<div class="controls-row">
-  <div class="controls-inner">
-    <div class="search-box">
-      <input id="searchInput" class="search-input" placeholder="Search locations..." />
-      <div id="suggestions" class="search-suggestions"></div>
+      <button class="phone-btn" id="phoneBtn" aria-controls="phonePanel" aria-expanded="false">📞 Phone Numbers</button>
     </div>
-
-    <button class="phone-btn" id="phoneBtn">📞 Phone Numbers</button>
   </div>
-</div>
 
-<div id="map"></div>
+  <!-- Map area -->
+  <div id="map"></div>
 
-<!-- LEGEND -->
-<div class="legend">
-  <b>Index</b><br><br>
-  <i style="color:#d62828;">●</i> Help Centres<br>
-  <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
-  <i style="color:#138a36;">●</i> Education & Youth<br>
-  <i style="color:#7e22ce;">●</i> Diverse Centres<br>
-  <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
-  <i style="color:#f97316;">●</i> Local Services<br>
-</div>
+  <!-- Legend (index) -->
+  <div class="legend" id="legend">
+    <b>Index</b><br><br>
+    <i style="color:#d62828;">●</i> Help Centres<br>
+    <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
+    <i style="color:#138a36;">●</i> Education & Youth<br>
+    <i style="color:#7e22ce;">●</i> Diverse Centres<br>
+    <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
+    <i style="color:#f97316;">●</i> Local Services<br>
+  </div>
 
-<!-- PHONE PANEL -->
-<div id="phonePanel" class="phone-panel">
-  <span id="panelClose" style="float:right; cursor:pointer;">✖</span>
-  <h3>Useful Phone Numbers</h3>
-  <ul>
-    <li>Citizens Advice: <b>01234 867944</b></li>
-    <li>Bedford Foodbank: <b>01234 268569</b></li>
-    <li>BRASS: <b>01234 211381</b></li>
-    <li>Bedford Hospital: <b>01234 355122</b></li>
-  </ul>
-</div>
+  <!-- Phone panel (full list from your original) -->
+  <div id="phonePanel" class="phone-panel" aria-hidden="true">
+    <span class="panel-close" id="panelClose" role="button" aria-label="Close panel">✖</span>
+    <h3>Useful Phone Numbers</h3>
+    <ul>
+      <li>Citizens Advice Bedford: <b>01234 867944</b></li>
+      <li>Bedford Foodbank: <b>01234 268569</b></li>
+      <li>Job centre plus: <b>0845 604 3719</b></li>
+      <li>BRASS Bedford: <b>01234 211381</b></li>
+      <li>SMART First Point Bedford: <b>01234 365955</b></li>
+      <li>King's Arm Project: <b>01234 350900</b></li>
+      <br>
+      <li>CAMHS Bedford: <b>01234 893300</b></li>
+      <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
+      <br>
+      <li>YMCA Bedfordshire: <b>01234 307040</b></li>
+      <li>Bedford Central Library: <b>01234 718178</b></li>
+      <li>Kempston Library: <b>01234 276453</b></li>
+      <li>Wootton Library: <b>01234 766061</b></li>
+      <br>
+      <li>Bedford Creative Arts Centre: <b>01234 818670</b></li>
+      <li>Higgins Museum Bedford: <b>01234 718618</b></li>
+      <br>
+      <li>De Parys Medical Group: <b>01234 351341</b></li>
+      <li>Priory Health Clinic: <b>01234 262040</b></li>
+      <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
+      <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
+      <li>Bedford Talking therapy: <b>01234 880400</b></li>
+      <li>Path to Recovery: <b>0333 332 4019</b></li>
+      <li>Putnoe Medical Centre: <b>01234 319992</b></li>
+      <li>Bedford Borough Social Services: <b>01234 267422</b></li>
+      <li>Bedford Hospital: <b>01234 355122</b></li>
+    </ul>
+  </div>
+
+  <!-- Credit -->
+  <div class="credit">Made by Aaima Shabir</div>
 
 <script>
-/* PHONE PANEL BEHAVIOUR */
-const phoneBtn = document.getElementById("phoneBtn");
-const phonePanel = document.getElementById("phonePanel");
-const panelClose = document.getElementById("panelClose");
+/* -------------------------
+   Map & markers setup
+   ------------------------- */
+const pastel = {
+  "Help Centre": "#d62828",
+  "Wellbeing": "#1d4ed8",
+  "Education": "#138a36",
+  "Diverse": "#7e22ce",
+  "Outdoor Wellbeing": "#0e7490",
+  "Local Service": "#f97316"
+};
 
-phoneBtn.onclick = () => phonePanel.classList.toggle("open");
-panelClose.onclick = () => phonePanel.classList.remove("open");
+function cartoonIcon(color) {
+  return L.divIcon({
+    html: `<svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+             <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="4"/>
+           </svg>`,
+    className: "",
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+}
 
-/* MAP */
-const map = L.map('map').setView([52.136, -0.47], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+const map = L.map('map', { maxZoom: 17 }).setView([52.135, -0.47], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
 
-/* MARKERS + SEARCH EXAMPLE (you can replace with your data) */
+/* Full list of locations (name, postcode, category, optional description) */
 const locations = [
-  { name: "Citizens Advice Bedford", coords: [52.1369, -0.4667], color: "#d62828" },
-  { name: "Bedford Wellbeing Centre", coords: [52.1345, -0.4801], color: "#1d4ed8" },
-  { name: "Youth Hub Bedford", coords: [52.1420, -0.4725], color: "#138a36" }
+    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
+    ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
+    ["BRASS Bedford", "MK40 2RB", "Help Centre", "(add description here)"],
+    ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
+    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
+    ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
+    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"],
+    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic – offers STI testing, advice & contraception"],
+    ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
+    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
+    ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
+    ["Path to Recovery", "MK40 2RT", "Wellbeing", "(add description here)"],
+    ["Bedford Central Library", "MK40 1PG", "Education", "(add description here)"],
+    ["Kempston Library", "MK42 8AT", "Education", "(add description here)"],
+    ["Wootton Library", "MK43 9LH", "Education", "(add description here)"],
+    ["YMCA Bedfordshire", "MK40 2AA", "Education", "(add description here)"],
+    ["Bedford Creative Arts", "MK41 7PH", "Diverse", "(add description here)"],
+    ["Higgins Museum Bedford", "MK40 3XD", "Diverse", "(add description here)"],
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing", "(add description here)"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing", "(add description here)"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing", "(add description here)"],
+    ["De Parys Medical Group", "MK40 2TX", "Local Service", "(add description here)"],
+    ["Priory Health Clinic", "MK41 6GA", "Local Service", "(add description here)"],
+    ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
+    ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
+    ["Putnoe Medical Centre", "MK41 9JE", "Local Service", "(add description here)"],
+    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
 ];
 
-locations.forEach(loc => {
-  L.circleMarker(loc.coords, {
-    radius: 10,
-    color: loc.color,
-    fillColor: loc.color,
-    fillOpacity: 0.9
-  }).addTo(map).bindPopup(loc.name);
+/* markerRefs will hold created marker objects and metadata for searching */
+const markerRefs = [];
+
+/* Fetch coordinates for all postcodes via postcodes.io (bulk) */
+fetch("https://api.postcodes.io/postcodes", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ postcodes: locations.map(l => l[1]) })
+})
+.then(r => r.json())
+.then(data => {
+  data.result.forEach((res, i) => {
+    if (!res.result) return;
+
+    const [name, postcode, category, description] = locations[i];
+    const lat = res.result.latitude;
+    const lon = res.result.longitude;
+
+    const marker = L.marker([lat, lon], { icon: cartoonIcon(pastel[category] || "#999999") })
+      .bindPopup(`<b>${name}</b><br>${postcode}<br><i style="color:#555">${description || ''}</i>`)
+      .addTo(map);
+
+    markerRefs.push({ name, postcode, category, description, lat, lon, marker });
+  });
+})
+.catch(err => {
+  console.error("postcode lookup failed", err);
 });
 
-/* SEARCH */
-const input = document.getElementById("searchInput");
-const suggestionBox = document.getElementById("suggestions");
+/* -------------------------
+   Search/autocomplete UI
+   ------------------------- */
+const input = document.getElementById('searchInput');
+const suggestionsEl = document.getElementById('suggestions');
 
-input.addEventListener("input", () => {
-  const term = input.value.toLowerCase().trim();
-  if (!term) { suggestionBox.style.display = "none"; return; }
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
-  const match = locations.filter(l => l.name.toLowerCase().includes(term));
+input.addEventListener('input', () => {
+  const q = input.value.trim().toLowerCase();
+  if (!q) { suggestionsEl.style.display='none'; suggestionsEl.innerHTML=''; return; }
 
-  suggestionBox.innerHTML = match.map(m =>
-    `<div class="suggestion" data-name="${m.name}">
-       <span class="dot" style="background:${m.color}"></span>
-       ${m.name}
-     </div>`
-  ).join("");
+  const matches = markerRefs.filter(m => m.name.toLowerCase().includes(q)).slice(0, 10);
 
-  suggestionBox.style.display = "block";
-});
-
-document.addEventListener("click", (e) => {
-  if (!suggestionBox.contains(e.target) && e.target !== input)
-    suggestionBox.style.display = "none";
-});
-
-suggestionBox.addEventListener("click", e => {
-  const row = e.target.closest(".suggestion");
-  if (!row) return;
-
-  const found = locations.find(l => l.name === row.dataset.name);
-  if (found) {
-    map.setView(found.coords, 16);
+  if (matches.length === 0) {
+    suggestionsEl.style.display='none';
+    suggestionsEl.innerHTML = '';
+    return;
   }
-  suggestionBox.style.display = "none";
-});
-</script>
 
+  const html = matches.map((m, idx) => {
+    const re = new RegExp('(' + escapeRegex(q) + ')', 'ig');
+    const highlighted = m.name.replace(re, '<span class="match">$1</span>');
+    const color = pastel[m.category] || '#888';
+    return `<div class="suggestion" role="option" data-idx="${idx}" data-lat="${m.lat}" data-lon="${m.lon}">
+              <div class="dot" style="background:${color}"></div>
+              <div class="label">${highlighted}<div style="font-size:12px;color:#666">${m.postcode}</div></div>
+            </div>`;
+  }).join('');
+  suggestionsEl.innerHTML = html;
+  suggestionsEl.style.display = 'block';
+
+  // wire up clicks after DOM insert
+  suggestionsEl.querySelectorAll('.suggestion').forEach(el => {
+    el.onclick = () => {
+      const lat = parseFloat(el.dataset.lat);
+      const lon = parseFloat(el.dataset.lon);
+      const idx = parseInt(el.dataset.idx, 10);
+      const picked = markerRefs.filter(m => m.name.toLowerCase().includes(input.value.trim().toLowerCase()))[idx];
+      map.setView([lat, lon], 15);
+      if (picked && picked.marker) picked.marker.openPopup();
+      suggestionsEl.style.display = 'none';
+      input.value = picked ? picked.name : '';
+    };
+  });
+});
+
+/* Hide suggestions when clicked outside */
+document.addEventListener('click', (e) => {
+  const box = document.querySelector('.search-box');
+  if (!box.contains(e.target)) suggestionsEl.style.display = 'none';
+});
+
+/* Close suggestions if phone panel opens, and vice versa */
+const phoneBtn = document.getElementById('phoneBtn');
+const phonePanel = document.getElementById('phonePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPhonePanel() {
+  phonePanel.classList.add('open');
+  phonePanel.setAttribute('aria-hidden','false');
+  phoneBtn.setAttribute('aria-expanded','true');
+  suggestionsEl.style.display = 'none';
+}
+function closePhonePanel() {
+  phonePanel.classList.remove('open');
+  phonePanel.setAttribute('aria-hidden','true');
+  phoneBtn.setAttribute('aria-expanded','false');
+}
+
+phoneBtn.addEventListener('click', () => {
+  if (phonePanel.classList.contains('open')) closePhonePanel();
+  else openPhonePanel();
+});
+
+panelClose.addEventListener('click', closePhonePanel);
+
+/* Prevent pinch-zoom gestures on some devices (keeps the UI stable) */
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("gesturechange", e => e.preventDefault());
+document.addEventListener("gestureend", e => e.preventDefault());
+</script>
 </body>
 </html>
