@@ -64,6 +64,7 @@
         padding: 20px;
         transition: right 0.35s ease;
         z-index: 999999;
+        overflow-y: auto;
     }
     .phone-panel.open {
         right: 0;
@@ -79,6 +80,24 @@
         color: #d1d5db;
         margin-left: 10px;
         font-weight: normal;
+    }
+
+    /* Search bar styles */
+    .search-container {
+        position: fixed;
+        top: 90px;
+        left: 20px;
+        z-index: 999999;
+        background: white;
+        padding: 5px;
+        border: 2px solid #1e3a8a;
+        border-radius: 5px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    }
+    .search-input {
+        width: 200px;
+        padding: 4px 6px;
+        font-size: 14px;
     }
 </style>
 </head>
@@ -137,6 +156,15 @@
     </ul>
 </div>
 
+<!-- Search bar container -->
+<div class="search-container">
+    <input id="searchInput" class="search-input" list="places" placeholder="Search location..." />
+    <datalist id="places">
+        <!-- options inserted dynamically -->
+    </datalist>
+    <button onclick="goToPlace()">Go</button>
+</div>
+
 <script>
 function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
@@ -176,8 +204,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-
-
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
@@ -185,9 +211,9 @@ const locations = [
     ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
     ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
     ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
-    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"]
-    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic - offers STI testing, Advice & contraception"],
-    
+    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"],
+    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic – offers STI testing, advice & contraception"],
+
     ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
     ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
     ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
@@ -214,6 +240,8 @@ const locations = [
     ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
 ];
 
+// Will store { name, lat, lon }
+const placeIndex = [];
 
 // Fetch postcode coords
 fetch("https://api.postcodes.io/postcodes", {
@@ -230,6 +258,7 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
+        // Add marker
         L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
             .bindPopup(`
                 <b>${name}</b><br>
@@ -237,8 +266,33 @@ fetch("https://api.postcodes.io/postcodes", {
                 <span style="color:#555; font-style:italic;">${description}</span>
             `)
             .addTo(map);
+
+        // Add to search index
+        placeIndex.push({ name, lat, lon });
     });
+
+    // Once done, populate the datalist for the search box
+    const datalist = document.getElementById("places");
+    placeIndex.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.name;
+        datalist.appendChild(opt);
+    });
+})
+.catch(err => {
+    console.error("Error fetching postcodes:", err);
 });
+
+function goToPlace() {
+    const input = document.getElementById("searchInput");
+    const name = input.value;
+    const place = placeIndex.find(p => p.name === name);
+    if (place) {
+        map.setView([place.lat, place.lon], 14);
+    } else {
+        alert("Location not found — please pick from list.");
+    }
+}
 </script>
 
 </body>
