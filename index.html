@@ -13,23 +13,36 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-  body { margin:0; font-family: 'Poppins', sans-serif; background:#fff; }
+  :root {
+    --primary:#1e3a8a;
+    --panel-w:300px;
+  }
 
+  html,body { height:100%; margin:0; font-family: 'Poppins', sans-serif; background:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+  /* Header */
   header {
-    background: #1e3a8a;
+    background: var(--primary);
     color: #fff;
     padding: 14px 18px;
     font-weight:700;
     font-size:20px;
     border-bottom: 3px solid #000;
+    height:64px;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    z-index: 99997;
+    position:relative;
   }
+  header .byline { font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px; }
 
   #map { height: calc(100vh - 64px); width:100%; }
 
-  /* Legend moved lower down (same size) */
+  /* Legend */
   .legend {
     position: fixed;
-    bottom: 10px; /* LOWERED */
+    bottom: 10px;
     left: 20px;
     background: #fff;
     padding: 8px 10px;
@@ -41,63 +54,39 @@
     line-height:1.25;
   }
 
-  /* Phone button */
-  .phone-btn {
+  /* Top controls container to keep search and phone vertically aligned */
+  .top-controls {
     position: fixed;
-    top: 90px;
-    right: 20px;
-    background: #1e3a8a;
-    color: white;
-    border: 2px solid black;
-    padding: 12px 16px;
-    border-radius: 28px;
-    cursor: pointer;
-    font-size: 15px;
-    z-index: 999999;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    font-weight:600;
-  }
-
-  /* Phone panel */
-  .phone-panel {
-    position: fixed;
+    left: 0;
+    right: 0;
     top: 0;
-    right: -320px;
-    width: 300px;
-    height: 100vh;
-    background: #fff2f2;
-    border-left: 3px solid black;
-    padding: 18px;
-    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-    transition: right 0.32s ease;
-    z-index: 999999;
-    overflow-y: auto;
+    height: 64px; /* same as header */
+    pointer-events: none; /* allow underlying header interactions if needed */
+    z-index: 99998;
   }
-  .phone-panel.open { right: 0; }
-  .panel-close { float:right; cursor:pointer; font-size:18px; }
 
-  /* Search container (smaller + stays left) */
+  /* Search container */
   .search-box {
-    position: fixed;
+    position: absolute;
     left: 20px;
-    top: 18px;
-    z-index: 999998;
-    width: 220px; /* SMALLER */
-    max-width: calc(100% - 40px);
-  }
-  @media (max-width: 600px) {
-    .search-box { top: 120px; }
-    .phone-btn { top: 78px; }
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 999999;
+    width: 200px;             /* less wide as requested */
+    max-width: calc(100% - 160px); /* leave space for phone button */
+    pointer-events: auto;
   }
 
   .search-input {
     width: 100%;
-    padding: 10px 12px; /* slightly smaller */
+    padding: 9px 12px;
     border-radius: 999px;
-    border: 2px solid #1e3a8a;
+    border: 2px solid var(--primary);
     box-shadow: 0 6px 14px rgba(0,0,0,0.12);
     outline: none;
-    font-size: 14px; /* smaller font */
+    font-size: 14px;
+    box-sizing: border-box;
+    background: #fff;
   }
 
   .search-suggestions {
@@ -106,7 +95,7 @@
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
-    border: 2px solid #1e3a8a;
+    border: 2px solid var(--primary);
     box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     max-height: 260px;
     overflow-y: auto;
@@ -124,39 +113,108 @@
   .suggestion:last-child { border-bottom: none; }
   .suggestion:hover { background: #eef2ff; }
 
-  /* Smaller circles */
+  /* Dot: ensure true circle (equal width+height) and no flex distortion */
   .dot {
-    width:8px;      /* SMALLER */
-    height:8px;     /* SMALLER */
+    width:14px;
+    height:14px;
     border-radius:50%;
     border:2px solid #000;
-    flex: 0 0 14px; /* reduced */
-    margin-left:2px;
+    box-sizing:border-box;
+    flex: 0 0 auto; /* do NOT stretch to different width/height */
+    margin: 0; /* keep consistent spacing handled by gap */
+    display:inline-block;
+    vertical-align:middle;
   }
+
+  .label { line-height:1.05; }
 
   /* highlight match */
   .match { font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
+
+  /* Phone button */
+  .phone-btn {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary);
+    color: white;
+    border: 2px solid black;
+    padding: 12px 16px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 15px;
+    z-index: 999999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-weight:600;
+    pointer-events: auto;
+  }
+
+  /* Phone panel: use transform to hide off-screen so it never "sticks out" */
+  .phone-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--panel-w);
+    height: 100vh;
+    background: #fff2f2;
+    border-left: 3px solid black;
+    padding: 18px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+    transform: translateX(100%); /* hidden (moved fully out) */
+    transition: transform 0.32s ease;
+    z-index: 999999;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .phone-panel.open { transform: translateX(0); }
+  .panel-close { float:right; cursor:pointer; font-size:18px; }
 
   /* credit moved to bottom-right */
   .credit {
     position: fixed;
     bottom: 6px;
-    right: 8px;   /* MOVED TO RIGHT */
+    right: 8px;
     font-size: 10px;
     color: gray;
     opacity: 0.65;
     z-index: 500;
   }
 
+  /* Accessibility focus */
+  .search-input:focus { box-shadow: 0 8px 20px rgba(30,58,138,0.16); }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .search-box { left: 12px; width: 170px; }
+    .phone-btn { right: 12px; padding:10px 14px; font-size:14px; }
+    .legend { left: 10px; bottom: 70px; }
+    .credit { right:6px; bottom:6px; }
+    .search-box { max-width: calc(100% - 120px); }
+  }
+
+  /* Ensure map sits under header and top-controls */
+  #map { z-index: 0; position: relative; }
+
 </style>
 </head>
 <body>
-<header>Bedford Support Map <span style="font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px;">by CHECKPOINT</span></header>
+<header>Bedford Support Map <span class="byline">by CHECKPOINT</span></header>
+
+<!-- top invisible layer that holds search + phone so they align with the header -->
+<div class="top-controls" aria-hidden="true">
+  <div class="search-box" style="pointer-events:auto;">
+    <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
+    <div id="suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+  </div>
+
+  <button class="phone-btn" id="phoneBtn" aria-controls="phonePanel" aria-expanded="false">📞 Phone Numbers</button>
+</div>
 
 <div id="map"></div>
 
 <!-- Legend -->
-<div class="legend" id="legend">
+<div class="legend" id="legend" aria-hidden="false">
   <b>Index</b><br><br>
   <i style="color:#d62828;">●</i> Help Centres<br>
   <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
@@ -166,17 +224,9 @@
   <i style="color:#f97316;">●</i> Local Services<br>
 </div>
 
-<!-- Search -->
-<div class="search-box">
-  <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
-  <div id="suggestions" class="search-suggestions"></div>
-</div>
-
-<!-- Phone button + panel -->
-<button class="phone-btn" id="phoneBtn">📞 Phone Numbers</button>
-
+<!-- Phone panel -->
 <div id="phonePanel" class="phone-panel" aria-hidden="true">
-  <span class="panel-close" id="panelClose">✖</span>
+  <span class="panel-close" id="panelClose" role="button" aria-label="Close panel">✖</span>
   <h3>Useful Phone Numbers</h3>
   <ul>
     <li>Citizens Advice Bedford: <b>01234 867944</b></li>
@@ -327,7 +377,7 @@ input.addEventListener('input', () => {
     const highlighted = m.name.replace(re, '<span class="match">$1</span>');
 
     const color = pastel[m.category] || '#888';
-    return `<div class="suggestion" data-lat="${m.lat}" data-lon="${m.lon}">
+    return `<div class="suggestion" role="option" data-lat="${m.lat}" data-lon="${m.lon}">
               <div class="dot" style="background:${color}"></div>
               <div class="label">${highlighted}<div style="font-size:12px;color:#666">${m.postcode}</div></div>
             </div>`;
@@ -362,11 +412,13 @@ const panelClose = document.getElementById('panelClose');
 function openPhonePanel() {
   phonePanel.classList.add('open');
   phonePanel.setAttribute('aria-hidden','false');
+  phoneBtn.setAttribute('aria-expanded','true');
   suggestionsEl.style.display = 'none';
 }
 function closePhonePanel() {
   phonePanel.classList.remove('open');
   phonePanel.setAttribute('aria-hidden','true');
+  phoneBtn.setAttribute('aria-expanded','false');
 }
 
 phoneBtn.addEventListener('click', () => {
@@ -382,3 +434,4 @@ document.addEventListener("gestureend", e => e.preventDefault());
 </script>
 </body>
 </html>
+
