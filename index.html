@@ -26,18 +26,18 @@
 
   #map { height: calc(100vh - 64px); width:100%; }
 
-  /* Legend (smaller) */
+  /* Legend moved lower down (same size) */
   .legend {
     position: fixed;
-    bottom: 30px;
+    bottom: 10px; /* LOWERED */
     left: 20px;
     background: #fff;
-    padding: 8px 10px;          /* reduced padding */
+    padding: 8px 10px;
     border-radius: 8px;
     border: 2px solid #000;
     box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     z-index: 99999;
-    font-size:12px;            /* slightly smaller */
+    font-size:12px;
     line-height:1.25;
   }
 
@@ -76,28 +76,28 @@
   .phone-panel.open { right: 0; }
   .panel-close { float:right; cursor:pointer; font-size:18px; }
 
-  /* Search container (top-left corner) */
+  /* Search container (smaller + stays left) */
   .search-box {
     position: fixed;
     left: 20px;
-    top: 18px; /* moved to corner */
+    top: 18px;
     z-index: 999998;
-    width: 300px;
+    width: 220px; /* SMALLER */
     max-width: calc(100% - 40px);
   }
   @media (max-width: 600px) {
-    .search-box { top: 120px; /* lowered on small screens to avoid phone button */ }
-    .phone-btn { top: 78px; } /* slight repositioning */
+    .search-box { top: 120px; }
+    .phone-btn { top: 78px; }
   }
 
   .search-input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 10px 12px; /* slightly smaller */
     border-radius: 999px;
     border: 2px solid #1e3a8a;
     box-shadow: 0 6px 14px rgba(0,0,0,0.12);
     outline: none;
-    font-size: 15px;
+    font-size: 14px; /* smaller font */
   }
 
   .search-suggestions {
@@ -124,23 +124,24 @@
   .suggestion:last-child { border-bottom: none; }
   .suggestion:hover { background: #eef2ff; }
 
+  /* Smaller circles */
   .dot {
-    width:12px;
-    height:12px;
+    width:8px;      /* SMALLER */
+    height:8px;     /* SMALLER */
     border-radius:50%;
     border:2px solid #000;
-    flex: 0 0 18px;
+    flex: 0 0 14px; /* reduced */
     margin-left:2px;
   }
 
   /* highlight match */
   .match { font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
 
-  /* small credit in corner */
+  /* credit moved to bottom-right */
   .credit {
     position: fixed;
     bottom: 6px;
-    left: 8px;
+    right: 8px;   /* MOVED TO RIGHT */
     font-size: 10px;
     color: gray;
     opacity: 0.65;
@@ -208,7 +209,7 @@
   </ul>
 </div>
 
-<!-- tiny credit -->
+<!-- credit -->
 <div class="credit">Made by Aaima Shabir</div>
 
 <script>
@@ -284,7 +285,7 @@ fetch("https://api.postcodes.io/postcodes", {
 .then(r => r.json())
 .then(data => {
   data.result.forEach((res, i) => {
-    if (!res.result) return; // postcode invalid or not found
+    if (!res.result) return;
 
     const [name, postcode, category, description] = locations[i];
     const lat = res.result.latitude;
@@ -313,7 +314,6 @@ input.addEventListener('input', () => {
   const q = input.value.trim().toLowerCase();
   if (!q) { suggestionsEl.style.display='none'; suggestionsEl.innerHTML=''; return; }
 
-  // filter markerRefs by name (simple substring), show top 10
   const matches = markerRefs.filter(m => m.name.toLowerCase().includes(q)).slice(0, 10);
 
   if (matches.length === 0) {
@@ -323,7 +323,6 @@ input.addEventListener('input', () => {
   }
 
   const html = matches.map(m => {
-    // highlight match
     const re = new RegExp('(' + escapeRegex(q) + ')', 'ig');
     const highlighted = m.name.replace(re, '<span class="match">$1</span>');
 
@@ -336,13 +335,11 @@ input.addEventListener('input', () => {
   suggestionsEl.innerHTML = html;
   suggestionsEl.style.display = 'block';
 
-  // attach click handlers
   suggestionsEl.querySelectorAll('.suggestion').forEach((el, idx) => {
     el.onclick = () => {
       const lat = parseFloat(el.dataset.lat);
       const lon = parseFloat(el.dataset.lon);
       const picked = matches[idx];
-      // center map & open popup
       map.setView([lat, lon], 15);
       if (picked && picked.marker) picked.marker.openPopup();
       suggestionsEl.style.display = 'none';
@@ -379,7 +376,6 @@ phoneBtn.addEventListener('click', () => {
 
 panelClose.addEventListener('click', closePhonePanel);
 
-/* stop iOS gesture zoom bug (optional) */
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
