@@ -1,277 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CHECKPOINT | Bedford Support Map</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<!-- Poppins font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-    }
-    header {
-        background: #1e3a8a;
-        color: white;
-        padding: 15px 25px;
-        font-size: 20px;
-        font-weight: bold;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    #map {
-        height: calc(100vh - 70px);
-        width: 100%;
-    }
+  body { margin:0; font-family: 'Poppins', sans-serif; background:#fff; }
 
-    /* Search bar */
-    .search-box {
-        position: fixed;
-        top: 85px;
-        left: 20px;
-        width: 260px;
-        z-index: 999999;
-    }
-    @media(max-width: 600px) {
-        .search-box {
-            top: 140px; /* moves down so it never overlaps */
-        }
-    }
-    .search-input {
-        width: 100%;
-        padding: 10px 14px;
-        border-radius: 20px;
-        border: 2px solid #1e3a8a;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-        font-size: 15px;
-        outline: none;
-    }
-    .search-results {
-        background: white;
-        border-radius: 15px;
-        margin-top: 5px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-        overflow: hidden;
-        border: 2px solid #1e3a8a;
-        display: none;
-    }
-    .search-item {
-        padding: 10px 14px;
-        cursor: pointer;
-        border-bottom: 1px solid #ddd;
-    }
-    .search-item:hover {
-        background: #eef2ff;
-    }
+  header {
+    background: #1e3a8a;
+    color: #fff;
+    padding: 14px 18px;
+    font-weight:700;
+    font-size:20px;
+    border-bottom: 3px solid #000;
+  }
 
-    /* Phone button */
-    .phone-btn {
-        position: fixed;
-        top: 90px;
-        right: 20px;
-        background: #1e3a8a;
-        color: white;
-        border: 2px solid black;
-        padding: 12px 16px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 15px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-        z-index: 999999;
-    }
+  #map { height: calc(100vh - 64px); width:100%; }
 
-    /* Phone panel */
-    .phone-panel {
-        position: fixed;
-        top: 0;
-        right: -320px;
-        width: 280px;
-        height: 100vh;
-        overflow-y: auto;
-        background: #fff2f2;
-        border-left: 3px solid black;
-        box-shadow: -3px 0 8px rgba(0,0,0,0.3);
-        padding: 20px;
-        transition: right 0.35s ease;
-        z-index: 999999;
-    }
-    .phone-panel.open {
-        right: 0;
-    }
-    .panel-close {
-        float: right;
-        cursor: pointer;
-        font-size: 18px;
-        margin-top: -5px;
-    }
+  /* Legend */
+  .legend {
+    position: fixed;
+    bottom: 40px;
+    left: 20px;
+    background: #fff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid #000;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    z-index: 99999;
+    font-size:13px;
+  }
+
+  /* Phone button */
+  .phone-btn {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    background: #1e3a8a;
+    color: white;
+    border: 2px solid black;
+    padding: 12px 16px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 15px;
+    z-index: 999999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-weight:600;
+  }
+
+  /* Phone panel */
+  .phone-panel {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100vh;
+    background: #fff2f2;
+    border-left: 3px solid black;
+    padding: 18px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+    transition: right 0.32s ease;
+    z-index: 999999;
+    overflow-y: auto;
+  }
+  .phone-panel.open { right: 0; }
+  .panel-close { float:right; cursor:pointer; font-size:18px; }
+
+  /* Search container */
+  .search-box {
+    position: fixed;
+    left: 20px;
+    top: 120px; /* default on desktop */
+    z-index: 999998;
+    width: 300px;
+    max-width: calc(100% - 40px);
+  }
+  @media (max-width: 600px) {
+    .search-box { top: 160px; /* lowered to avoid overlapping phone button */ }
+    .phone-btn { top: 80px; } /* slight repositioning */
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 999px;
+    border: 2px solid #1e3a8a;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    outline: none;
+    font-size: 15px;
+  }
+
+  .search-suggestions {
+    display: none;
+    margin-top: 8px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #1e3a8a;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .suggestion {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:10px 12px;
+    cursor:pointer;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+  }
+  .suggestion:last-child { border-bottom: none; }
+  .suggestion:hover { background: #eef2ff; }
+
+  .dot {
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    border:2px solid #000;
+    flex: 0 0 18px;
+    margin-left:2px;
+  }
+
+  /* highlight match */
+  .match { font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
+
 </style>
 </head>
 <body>
-<header>
-    Bedford Support Map <span class="brand-tag">by CHECKPOINT</span>
-</header>
+<header>Bedford Support Map <span style="font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px;">by CHECKPOINT</span></header>
 
 <div id="map"></div>
 
-<!-- SEARCH BAR -->
+<!-- Legend -->
+<div class="legend" id="legend">
+  <b>Index</b><br><br>
+  <i style="color:#d62828;">●</i> Help Centres<br>
+  <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
+  <i style="color:#138a36;">●</i> Education & Youth<br>
+  <i style="color:#7e22ce;">●</i> Diverse Centres<br>
+  <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
+  <i style="color:#f97316;">●</i> Local Services<br>
+</div>
+
+<!-- Search -->
 <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search locations...">
-    <div id="searchResults" class="search-results"></div>
+  <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
+  <div id="suggestions" class="search-suggestions"></div>
 </div>
 
-<button class="phone-btn" onclick="togglePhonePanel()">Phone Numbers</button>
+<!-- Phone button + panel -->
+<button class="phone-btn" id="phoneBtn">📞 Phone Numbers</button>
 
-<div id="phonePanel" class="phone-panel">
-    <span class="panel-close" onclick="togglePhonePanel()">✖</span>
-    <h3>Useful Phone Numbers</h3>
-
-    <ul>
-        <li>Citizens Advice Bedford: <b>01234 867944</b></li>
-        <li>Bedford Foodbank: <b>01234 268569</b></li>
-        <li>Job centre plus: <b>0845 604 3719</b></li>
-        <li>BRASS Bedford: <b>01234 211381</b></li>
-        <li>SMART First Point Bedford: <b>01234 365955</b></li>
-        <li>King's Arm Project: <b>01234 350900</b></li>
-        <br>
-        <li>CAMHS Bedford: <b>01234 893300</b></li>
-        <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
-        <br>
-        <li>YMCA Bedfordshire: <b>01234 307040</b></li>
-        <li>Bedford Central Library: <b>01234 718178</b></li>
-        <li>Kempston Library: <b>01234 276453</b></li>
-        <li>Wootton Library: <b>01234 766061</b></li>
-        <br>
-        <li>Bedford Creative Arts Centre: <b>01234 818670</b></li>
-        <li>Higgins Museum Bedford: <b>01234 718618</b></li>
-        <br>
-        <li>De Parys Medical Group: <b>01234 351341</b></li>
-        <li>Priory Health Clinic: <b>01234 262040</b></li>
-        <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
-        <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
-        <li>Bedford Talking therapy: <b>01234 880400</b></li>
-        <li>Path to Recovery: <b>0333 332 4019</b></li>
-        <li>Putnoe Medical Centre: <b>01234 319992</b></li>
-        <li>Bedford Borough Social Services: <b>01234 267422</b></li>
-        <li>Bedford Hospital: <b>01234 355122</b></li>
-    </ul>
+<div id="phonePanel" class="phone-panel" aria-hidden="true">
+  <span class="panel-close" id="panelClose">✖</span>
+  <h3>Useful Phone Numbers</h3>
+  <ul>
+    <li>Citizens Advice Bedford: <b>01234 867944</b></li>
+    <li>Bedford Foodbank: <b>01234 268569</b></li>
+    <li>Job centre plus: <b>0845 604 3719</b></li>
+    <li>BRASS Bedford: <b>01234 211381</b></li>
+    <li>SMART First Point Bedford: <b>01234 365955</b></li>
+    <li>King's Arm Project: <b>01234 350900</b></li>
+    <br>
+    <li>CAMHS Bedford: <b>01234 893300</b></li>
+    <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
+    <br>
+    <li>YMCA Bedfordshire: <b>01234 307040</b></li>
+    <li>Bedford Central Library: <b>01234 718178</b></li>
+    <li>Kempston Library: <b>01234 276453</b></li>
+    <li>Wootton Library: <b>01234 766061</b></li>
+    <br>
+    <li>Bedford Creative Arts Centre: <b>01234 818670</b></li>
+    <li>Higgins Museum Bedford: <b>01234 718618</b></li>
+    <br>
+    <li>De Parys Medical Group: <b>01234 351341</b></li>
+    <li>Priory Health Clinic: <b>01234 262040</b></li>
+    <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
+    <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
+    <li>Bedford Talking therapy: <b>01234 880400</b></li>
+    <li>Path to Recovery: <b>0333 332 4019</b></li>
+    <li>Putnoe Medical Centre: <b>01234 319992</b></li>
+    <li>Bedford Borough Social Services: <b>01234 267422</b></li>
+    <li>Bedford Hospital: <b>01234 355122</b></li>
+  </ul>
 </div>
+
 <script>
-function togglePhonePanel() {
-    document.getElementById("phonePanel").classList.toggle("open");
-
-    // Close search suggestions when panel opens
-    document.getElementById("searchResults").style.display = "none";
-}
-
+/* -------------------------
+   Map & markers setup
+   ------------------------- */
 const pastel = {
-    "Help Centre": "#d62828",
-    "Wellbeing": "#1d4ed8",
-    "Education": "#138a36",
-    "Diverse": "#7e22ce",
-    "Outdoor Wellbeing": "#0e7490",
-    "Local Service": "#f97316"
+  "Help Centre": "#d62828",
+  "Wellbeing": "#1d4ed8",
+  "Education": "#138a36",
+  "Diverse": "#7e22ce",
+  "Outdoor Wellbeing": "#0e7490",
+  "Local Service": "#f97316"
 };
 
 function cartoonIcon(color) {
-    return L.divIcon({
-        html: `<svg width="28" height="28" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="3"/>
-            </svg>`,
-        className: "",
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
-    });
+  return L.divIcon({
+    html: `<svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+             <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="4"/>
+           </svg>`,
+    className: "",
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
 }
 
-const map = L.map("map", { maxZoom: 17 }).setView([52.135, -0.47], 12);
+const map = L.map('map', { maxZoom: 17 }).setView([52.135, -0.47], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-
+/* Full list of locations (name, postcode, category, optional description) */
 const locations = [
-    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre"],
-    ["Bedford Foodbank", "MK41 7PE", "Help Centre"],
-    ["BRASS Bedford", "MK40 2RB", "Help Centre"],
-    ["Kings Arm Project", "MK42 9AZ", "Help Centre"],
-    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre"],
-    ["Job Centre Plus", "MK40 2EH", "Help Centre"],
-    ["Bedford Hospital", "MK42 9DJ", "Help Centre"],
-    ["iCaSH Bedford", "MK42 0AH", "Local Service"],
-    ["CAMHS", "MK42 9DJ", "Wellbeing"],
-    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing"],
-    ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing"],
-    ["Path to Recovery", "MK40 2RT", "Wellbeing"],
-    ["Bedford Central Library", "MK40 1PG", "Education"],
-    ["Kempston Library", "MK42 8AT", "Education"],
-    ["Wootton Library", "MK43 9LH", "Education"],
-    ["YMCA Bedfordshire", "MK40 2AA", "Education"],
-    ["Bedford Creative Arts", "MK41 7PH", "Diverse"],
-    ["Higgins Museum Bedford", "MK40 3XD", "Diverse"],
-    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing"],
-    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing"],
-    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing"],
-    ["De Parys Medical Group", "MK40 2TX", "Local Service"],
-    ["Priory Health Clinic", "MK41 6GA", "Local Service"],
-    ["Queen’s Park Surgery", "MK40 4HR", "Local Service"],
-    ["London Road Surgery", "MK42 0NT", "Local Service"],
-    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service"],
-    ["Putnoe Medical Centre", "MK41 9JE", "Local Service"],
-    ["Bedford Borough Social Services", "MK42 9AP", "Local Service"]
+    ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
+    ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
+    ["BRASS Bedford", "MK40 2RB", "Help Centre", "(add description here)"],
+    ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
+    ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
+    ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
+    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"],
+    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic – offers STI testing, advice & contraception"],
+    ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
+    ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
+    ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
+    ["Path to Recovery", "MK40 2RT", "Wellbeing", "(add description here)"],
+    ["Bedford Central Library", "MK40 1PG", "Education", "(add description here)"],
+    ["Kempston Library", "MK42 8AT", "Education", "(add description here)"],
+    ["Wootton Library", "MK43 9LH", "Education", "(add description here)"],
+    ["YMCA Bedfordshire", "MK40 2AA", "Education", "(add description here)"],
+    ["Bedford Creative Arts", "MK41 7PH", "Diverse", "(add description here)"],
+    ["Higgins Museum Bedford", "MK40 3XD", "Diverse", "(add description here)"],
+    ["Russell Park", "MK40 3SA", "Outdoor Wellbeing", "(add description here)"],
+    ["Priory Country Park", "MK41 9DJ", "Outdoor Wellbeing", "(add description here)"],
+    ["Addison Howard Park", "MK42 8PN", "Outdoor Wellbeing", "(add description here)"],
+    ["De Parys Medical Group", "MK40 2TX", "Local Service", "(add description here)"],
+    ["Priory Health Clinic", "MK41 6GA", "Local Service", "(add description here)"],
+    ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
+    ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
+    ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
+    ["Putnoe Medical Centre", "MK41 9JE", "Local Service", "(add description here)"],
+    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
 ];
 
-// MARKERS
-let markerRefs = [];
+/* markerRefs will hold created marker objects and metadata for searching */
+const markerRefs = [];
 
+/* Fetch coordinates for all postcodes via postcodes.io (bulk) */
 fetch("https://api.postcodes.io/postcodes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ postcodes: locations.map(l => l[1]) })
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ postcodes: locations.map(l => l[1]) })
 })
 .then(r => r.json())
 .then(data => {
-    data.result.forEach((entry, i) => {
-        if (!entry.result) return;
+  data.result.forEach((res, i) => {
+    if (!res.result) return; // postcode invalid or not found
 
-        const [name, postcode, category] = locations[i];
-        const lat = entry.result.latitude;
-        const lon = entry.result.longitude;
+    const [name, postcode, category, description] = locations[i];
+    const lat = res.result.latitude;
+    const lon = res.result.longitude;
 
-        const marker = L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
-            .bindPopup(`<b>${name}</b><br>${postcode}`)
-            .addTo(map);
+    const marker = L.marker([lat, lon], { icon: cartoonIcon(pastel[category] || "#999999") })
+      .bindPopup(`<b>${name}</b><br>${postcode}<br><i style="color:#555">${description || ''}</i>`)
+      .addTo(map);
 
-        markerRefs.push({ name, lat, lon, marker });
-    });
+    markerRefs.push({ name, postcode, category, description, lat, lon, marker });
+  });
+})
+.catch(err => {
+  console.error("postcode lookup failed", err);
 });
 
-// SEARCH
-const searchInput = document.getElementById("searchInput");
-const searchResults = document.getElementById("searchResults");
+/* -------------------------
+   Search/autocomplete UI
+   ------------------------- */
+const input = document.getElementById('searchInput');
+const suggestionsEl = document.getElementById('suggestions');
 
-searchInput.addEventListener("input", () => {
-    const v = searchInput.value.toLowerCase().trim();
-    if (v === "") {
-        searchResults.style.display = "none";
-        return;
-    }
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
-    const matches = markerRefs.filter(l => l.name.toLowerCase().includes(v));
-    searchResults.innerHTML = matches.map(m => `<div class='search-item'>${m.name}</div>`).join("");
+input.addEventListener('input', () => {
+  const q = input.value.trim().toLowerCase();
+  if (!q) { suggestionsEl.style.display='none'; suggestionsEl.innerHTML=''; return; }
 
-    searchResults.style.display = matches.length ? "block" : "none";
+  // filter markerRefs by name (simple substring), show top 10
+  const matches = markerRefs.filter(m => m.name.toLowerCase().includes(q)).slice(0, 10);
 
-    document.querySelectorAll(".search-item").forEach((item, index) => {
-        item.onclick = () => {
-            const picked = matches[index];
-            map.setView([picked.lat, picked.lon], 16);
-            picked.marker.openPopup();
-            searchResults.style.display = "none";
-            searchInput.value = picked.name;
-        };
-    });
+  if (matches.length === 0) {
+    suggestionsEl.style.display='none';
+    suggestionsEl.innerHTML = '';
+    return;
+  }
+
+  const html = matches.map(m => {
+    // highlight match
+    const re = new RegExp('(' + escapeRegex(q) + ')', 'ig');
+    const highlighted = m.name.replace(re, '<span class="match">$1</span>');
+
+    const color = pastel[m.category] || '#888';
+    return `<div class="suggestion" data-lat="${m.lat}" data-lon="${m.lon}">
+              <div class="dot" style="background:${color}"></div>
+              <div class="label">${highlighted}<div style="font-size:12px;color:#666">${m.postcode}</div></div>
+            </div>`;
+  }).join('');
+  suggestionsEl.innerHTML = html;
+  suggestionsEl.style.display = 'block';
+
+  // attach click handlers
+  suggestionsEl.querySelectorAll('.suggestion').forEach((el, idx) => {
+    el.onclick = () => {
+      const lat = parseFloat(el.dataset.lat);
+      const lon = parseFloat(el.dataset.lon);
+      const picked = matches[idx];
+      // center map & open popup
+      map.setView([lat, lon], 15);
+      if (picked && picked.marker) picked.marker.openPopup();
+      suggestionsEl.style.display = 'none';
+      input.value = picked ? picked.name : '';
+    };
+  });
 });
+
+/* Hide suggestions when clicked outside */
+document.addEventListener('click', (e) => {
+  const box = document.querySelector('.search-box');
+  if (!box.contains(e.target)) suggestionsEl.style.display = 'none';
+});
+
+/* Close suggestions if phone panel opens, and vice versa */
+const phoneBtn = document.getElementById('phoneBtn');
+const phonePanel = document.getElementById('phonePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPhonePanel() {
+  phonePanel.classList.add('open');
+  phonePanel.setAttribute('aria-hidden','false');
+  suggestionsEl.style.display = 'none';
+}
+function closePhonePanel() {
+  phonePanel.classList.remove('open');
+  phonePanel.setAttribute('aria-hidden','true');
+}
+
+phoneBtn.addEventListener('click', () => {
+  if (phonePanel.classList.contains('open')) closePhonePanel();
+  else openPhonePanel();
+});
+
+panelClose.addEventListener('click', closePhonePanel);
+
+/* stop iOS gesture zoom bug (optional) */
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("gesturechange", e => e.preventDefault());
+document.addEventListener("gestureend", e => e.preventDefault());
 </script>
 </body>
 </html>
