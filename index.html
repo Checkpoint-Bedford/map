@@ -103,7 +103,7 @@ header .byline{ font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px
   </ul>
 </div>
 
-<div class="credit">Made by Aaima Shabir</div>
+<div class="credit">Made by Aaima Shabir and Aimua Stephen</div>
 
 <script>
 const pastel = {
@@ -135,33 +135,33 @@ const map = L.map('map',{maxZoom:17}).setView([52.135,-0.47],12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);
 
 const locations=[
-["Citizens Advice Bedford","MK40 1TP","Help Centre","Description placeholder"],
-["Bedford Foodbank","MK41 7PE","Help Centre","Description placeholder"],
-["BRASS Bedford","MK40 2RB","Help Centre","Description placeholder"],
-["Kings Arm Project","MK42 9AZ","Help Centre","Description placeholder"],
-["SMART First Point Bedford","MK40 3HZ","Help Centre","Description placeholder"],
-["Job Centre Plus","MK40 2EH","Help Centre","Description placeholder"],
+["Citizens Advice Bedford","MK40 1TP","Help Centre","Provides advice and guidance across a wide range of issues"],
+["Bedford Foodbank","MK41 7PE","Help Centre","Provides emergency food support to those in financial crisis"],
+["BRASS Bedford","MK40 2RB","Help Centre","Supports refugees through immigration advice and English tuition"],
+["Kings Arm Project","MK42 9AZ","Help Centre","Provides support to the homeless and isolated through acommodation and employment assistance"],
+["SMART First Point Bedford","MK40 3HZ","Help Centre","Supports the homeless, rough sleeping or those at risk of losing their house"],
+["Job Centre Plus","MK40 2EH","Help Centre","Agency that helps individuals find employment"],
 ["Bedford Hospital","MK42 9DJ","Help Centre","Description placeholder"],
-["iCaSH Bedford","MK42 0AH","Local Service","Description placeholder"],
-["CAMHS","MK42 9DJ","Wellbeing","Description placeholder"],
-["Recovery Lounge Bedford","MK40 2NX","Wellbeing","Description placeholder"],
+["iCaSH Bedford","MK42 0AH","Local Service","Sexual and reproductive health centre offering STI testing & treatment and contraception"],
+["CAMHS","MK42 9DJ","Wellbeing","Supports youth experiencing mental health or emotional difficulties"],
+["Recovery Lounge Bedford","MK40 2NX","Wellbeing","A safe space for adults experiencing mental health crisis"],
 ["Bedford Talking Therapies","MK40 2AW","Wellbeing","Description placeholder"],
 ["Path to Recovery","MK40 2RT","Wellbeing","Description placeholder"],
-["Bedford Central Library","MK40 1PG","Education","Description placeholder"],
-["Kempston Library","MK42 8AT","Education","Description placeholder"],
-["Wootton Library","MK43 9LH","Education","Description placeholder"],
-["YMCA Bedfordshire","MK40 2AA","Education","Description placeholder"],
-["Bedford Creative Arts","MK41 7PH","Diverse","Description placeholder"],
-["Higgins Museum Bedford","MK40 3XD","Diverse","Description placeholder"],
-["Russell Park","MK40 3SA","Outdoor Wellbeing","Description placeholder"],
-["Priory Country Park","MK41 9DJ","Outdoor Wellbeing","Description placeholder"],
-["Addison Howard Park","MK42 8PN","Outdoor Wellbeing","Description placeholder"],
-["De Parys Medical Group","MK40 2TX","Local Service","Description placeholder"],
-["Priory Health Clinic","MK41 6GA","Local Service","Description placeholder"],
-["Queen’s Park Surgery","MK40 4HR","Local Service","Description placeholder"],
-["London Road Surgery","MK42 0NT","Local Service","Description placeholder"],
+["Bedford Central Library","MK40 1PG","Education","Offers free Wi-fi and access to computers and printing"],
+["Kempston Library","MK42 8AT","Education","Offers free Wi-fi and access to computers and printing"],
+["Wootton Library","MK43 9LH","Education","Offers free Wi-fi and access to computers and printing"],
+["YMCA Bedfordshire","MK40 2AA","Education","Extensive support accomodation and personal training"],
+["Bedford Creative Arts","MK41 7PH","Diverse","Arts charity producing socially engaged art products across Bedford"],
+["Higgins Museum Bedford","MK40 3XD","Diverse","Cultural service exhibiting social history, archeology and other arts"],
+["Russell Park","MK40 3SA","Outdoor Wellbeing","Green space featuring gardens, sports facilities and a cafe"],
+["Priory Country Park","MK41 9DJ","Outdoor Wellbeing","Green space including lakes, meadows and woodlands"],
+["Addison Howard Park","MK42 8PN","Outdoor Wellbeing","Green space including sports courts and a community garden"],
+["De Parys Medical Group","MK40 2TX","Local Service","Health clinic offering immunizations, asthma clinics and more"],
+["Priory Health Clinic","MK41 6GA","Local Service","Provider of mental health and adult social care (including depression, anxiety and addictions)"],
+["Queen’s Park Surgery","MK40 4HR","Local Service","GP Practie offering various health services"],
+["London Road Surgery","MK42 0NT","Local Service","GP Practie offering various health service"],
 ["Beds Fire & Rescue Community","MK41 9LN","Local Service","Description placeholder"],
-["Putnoe Medical Centre","MK41 9JE","Local Service","Description placeholder"],
+["Putnoe Medical Centre","MK41 9JE","Local Service","GP Practie offering various health service"],
 ["Bedford Borough Social Services","MK42 9AP","Local Service","Description placeholder"]
 ];
 
@@ -186,7 +186,6 @@ fetch("https://api.postcodes.io/postcodes",{
   });
 });
 
-// -------------------- Search and phone panel --------------------
 const input = document.getElementById('searchInput');
 const suggestionsEl = document.getElementById('suggestions');
 
