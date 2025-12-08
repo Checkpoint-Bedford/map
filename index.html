@@ -14,35 +14,176 @@
 
 <style>
   :root {
-    --primary:#1e3a8a;
-    --panel-w:300px;
+    --primary: #1e3a8a;
+    --panel-w: 300px;
+    --banner-h: 120px; /* extended blue area height */
+    --header-h: 64px;  /* header (title) stays this size) */
   }
 
-  html,body { height:100%; margin:0; font-family: 'Poppins', sans-serif; background:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  html, body { height: 100%; margin: 0; font-family: 'Poppins', sans-serif; background:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-  /* Header */
-  header {
+  /* Blue banner behind header + controls */
+  .blue-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--banner-h);
     background: var(--primary);
+    z-index: 99996;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  /* Header (title) - unchanged size */
+  header {
+    height: var(--header-h);
+    line-height: var(--header-h);
     color: #fff;
-    padding: 14px 18px;
     font-weight:700;
     font-size:20px;
+    padding: 0 18px;
+    box-sizing: border-box;
     border-bottom: 3px solid #000;
-    height:64px;
-    box-sizing:border-box;
-    display:flex;
-    align-items:center;
-    z-index: 99997;
-    position:relative;
+    display: flex;
+    align-items: center;
+    z-index: 99997; /* above banner */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: transparent; /* banner provides background */
   }
   header .byline { font-weight:400; margin-left:10px; color:#d1d5db; font-size:13px; }
 
-  #map { height: calc(100vh - 64px); width:100%; }
+  /* Map below banner/header */
+  #map { position: absolute; top: var(--banner-h); left: 0; right: 0; bottom: 0; z-index: 0; }
 
-  /* Legend */
+  /* Controls area inside the blue banner below the header */
+  .controls-row {
+    position: fixed;
+    top: calc(var(--header-h));
+    left: 0;
+    right: 0;
+    height: calc(var(--banner-h) - var(--header-h)); /* area below header */
+    z-index: 99998;
+    pointer-events: none; /* allow only children to receive events */
+  }
+
+  /* Center the search+phone horizontally but keep left and right padding */
+  .controls-inner {
+    max-width: 1200px;
+    margin: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* left search / right phone */
+    pointer-events: auto;
+  }
+
+  /* Search container (fixed width, less wide) */
+  .search-box {
+    position: relative;
+    width: 220px;        /* as requested, less wide */
+    min-width: 140px;
+    box-sizing: border-box;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 999px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    box-sizing: border-box;
+  }
+
+  /* Suggestions are absolutely positioned below the input so they don't change the parent height */
+  .search-suggestions {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 100000;
+  }
+
+  .suggestion {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:10px 12px;
+    cursor:pointer;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+    background: #fff;
+  }
+  .suggestion:last-child { border-bottom: none; }
+  .suggestion:hover { background: #eef2ff; }
+
+  /* Dot: ensure true circle (equal width+height) and prevent flex distortion */
+  .dot {
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:2px solid #000;
+    flex: 0 0 auto; /* do not grow or shrink */
+    box-sizing: border-box;
+    display:inline-block;
+    vertical-align:middle;
+  }
+
+  .label { line-height:1.05; }
+
+  .match { font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
+
+  /* Phone button positioned on the right, level with search */
+  .phone-btn {
+    background: var(--primary);
+    color: white;
+    border: 2px solid black;
+    padding: 12px 16px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-weight:600;
+    pointer-events: auto;
+    white-space: nowrap;
+  }
+
+  /* Phone panel: hidden off-screen with transform (so it never peeks out) */
+  .phone-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--panel-w);
+    height: 100vh;
+    background: #fff2f2;
+    border-left: 3px solid black;
+    padding: 18px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+    transform: translateX(100%); /* completely hidden */
+    transition: transform 0.32s ease;
+    z-index: 100001;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .phone-panel.open { transform: translateX(0); }
+  .panel-close { float:right; cursor:pointer; font-size:18px; }
+
+  /* Legend (index) moved back down */
   .legend {
     position: fixed;
-    bottom: 10px;
+    bottom: 20px;  /* brought down */
     left: 20px;
     background: #fff;
     padding: 8px 10px;
@@ -54,123 +195,7 @@
     line-height:1.25;
   }
 
-  /* Top controls container to keep search and phone vertically aligned */
-  .top-controls {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 64px; /* same as header */
-    pointer-events: none; /* allow underlying header interactions if needed */
-    z-index: 99998;
-  }
-
-  /* Search container */
-  .search-box {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 999999;
-    width: 200px;             /* less wide as requested */
-    max-width: calc(100% - 160px); /* leave space for phone button */
-    pointer-events: auto;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: 999px;
-    border: 2px solid var(--primary);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-    outline: none;
-    font-size: 14px;
-    box-sizing: border-box;
-    background: #fff;
-  }
-
-  .search-suggestions {
-    display: none;
-    margin-top: 8px;
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid var(--primary);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    max-height: 260px;
-    overflow-y: auto;
-  }
-
-  .suggestion {
-    display:flex;
-    gap:10px;
-    align-items:center;
-    padding:10px 12px;
-    cursor:pointer;
-    border-bottom:1px solid #eee;
-    font-size:14px;
-  }
-  .suggestion:last-child { border-bottom: none; }
-  .suggestion:hover { background: #eef2ff; }
-
-  /* Dot: ensure true circle (equal width+height) and no flex distortion */
-  .dot {
-    width:14px;
-    height:14px;
-    border-radius:50%;
-    border:2px solid #000;
-    box-sizing:border-box;
-    flex: 0 0 auto; /* do NOT stretch to different width/height */
-    margin: 0; /* keep consistent spacing handled by gap */
-    display:inline-block;
-    vertical-align:middle;
-  }
-
-  .label { line-height:1.05; }
-
-  /* highlight match */
-  .match { font-weight:700; background: linear-gradient(transparent 60%, rgba(255,230,230,0.6) 60%); }
-
-  /* Phone button */
-  .phone-btn {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--primary);
-    color: white;
-    border: 2px solid black;
-    padding: 12px 16px;
-    border-radius: 28px;
-    cursor: pointer;
-    font-size: 15px;
-    z-index: 999999;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    font-weight:600;
-    pointer-events: auto;
-  }
-
-  /* Phone panel: use transform to hide off-screen so it never "sticks out" */
-  .phone-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: var(--panel-w);
-    height: 100vh;
-    background: #fff2f2;
-    border-left: 3px solid black;
-    padding: 18px;
-    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-    transform: translateX(100%); /* hidden (moved fully out) */
-    transition: transform 0.32s ease;
-    z-index: 999999;
-    overflow-y: auto;
-    box-sizing: border-box;
-  }
-  .phone-panel.open { transform: translateX(0); }
-  .panel-close { float:right; cursor:pointer; font-size:18px; }
-
-  /* credit moved to bottom-right */
+  /* Credit at bottom-right */
   .credit {
     position: fixed;
     bottom: 6px;
@@ -184,83 +209,94 @@
   /* Accessibility focus */
   .search-input:focus { box-shadow: 0 8px 20px rgba(30,58,138,0.16); }
 
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    .search-box { left: 12px; width: 170px; }
-    .phone-btn { right: 12px; padding:10px 14px; font-size:14px; }
-    .legend { left: 10px; bottom: 70px; }
-    .credit { right:6px; bottom:6px; }
-    .search-box { max-width: calc(100% - 120px); }
+  /* Responsive */
+  @media (max-width: 800px) {
+    .controls-inner { margin: 0 12px; }
+    .search-box { width: 170px; }
+    .phone-btn { padding: 10px 12px; font-size: 14px; }
   }
-
-  /* Ensure map sits under header and top-controls */
-  #map { z-index: 0; position: relative; }
+  @media (max-width: 480px) {
+    .controls-inner { justify-content: space-between; gap: 8px; }
+    .search-box { width: 150px; }
+    .legend { left: 8px; bottom: 80px; }
+  }
 
 </style>
 </head>
 <body>
-<header>Bedford Support Map <span class="byline">by CHECKPOINT</span></header>
+  <!-- Extended blue banner behind header and controls -->
+  <div class="blue-banner" aria-hidden="true"></div>
 
-<!-- top invisible layer that holds search + phone so they align with the header -->
-<div class="top-controls" aria-hidden="true">
-  <div class="search-box" style="pointer-events:auto;">
-    <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
-    <div id="suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+  <!-- Header (title) - same visual size as before -->
+  <header>
+    Bedford Support Map <span class="byline">by CHECKPOINT</span>
+  </header>
+
+  <!-- Controls row sits under the header inside the blue-banner -->
+  <div class="controls-row" aria-hidden="false">
+    <div class="controls-inner">
+      <!-- Search (left) -->
+      <div class="search-box">
+        <input id="searchInput" class="search-input" placeholder="Search locations..." autocomplete="off" />
+        <div id="suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+      </div>
+
+      <!-- Phone (right) -->
+      <button class="phone-btn" id="phoneBtn" aria-controls="phonePanel" aria-expanded="false">📞 Phone Numbers</button>
+    </div>
   </div>
 
-  <button class="phone-btn" id="phoneBtn" aria-controls="phonePanel" aria-expanded="false">📞 Phone Numbers</button>
-</div>
+  <!-- Map -->
+  <div id="map"></div>
 
-<div id="map"></div>
+  <!-- Legend -->
+  <div class="legend" id="legend">
+    <b>Index</b><br><br>
+    <i style="color:#d62828;">●</i> Help Centres<br>
+    <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
+    <i style="color:#138a36;">●</i> Education & Youth<br>
+    <i style="color:#7e22ce;">●</i> Diverse Centres<br>
+    <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
+    <i style="color:#f97316;">●</i> Local Services<br>
+  </div>
 
-<!-- Legend -->
-<div class="legend" id="legend" aria-hidden="false">
-  <b>Index</b><br><br>
-  <i style="color:#d62828;">●</i> Help Centres<br>
-  <i style="color:#1d4ed8;">●</i> Mental Health & Wellbeing<br>
-  <i style="color:#138a36;">●</i> Education & Youth<br>
-  <i style="color:#7e22ce;">●</i> Diverse Centres<br>
-  <i style="color:#0e7490;">●</i> Outdoor Wellbeing<br>
-  <i style="color:#f97316;">●</i> Local Services<br>
-</div>
+  <!-- Phone panel -->
+  <div id="phonePanel" class="phone-panel" aria-hidden="true">
+    <span class="panel-close" id="panelClose" role="button" aria-label="Close panel">✖</span>
+    <h3>Useful Phone Numbers</h3>
+    <ul>
+      <li>Citizens Advice Bedford: <b>01234 867944</b></li>
+      <li>Bedford Foodbank: <b>01234 268569</b></li>
+      <li>Job centre plus: <b>0845 604 3719</b></li>
+      <li>BRASS Bedford: <b>01234 211381</b></li>
+      <li>SMART First Point Bedford: <b>01234 365955</b></li>
+      <li>King's Arm Project: <b>01234 350900</b></li>
+      <br>
+      <li>CAMHS Bedford: <b>01234 893300</b></li>
+      <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
+      <br>
+      <li>YMCA Bedfordshire: <b>01234 307040</b></li>
+      <li>Bedford Central Library: <b>01234 718178</b></li>
+      <li>Kempston Library: <b>01234 276453</b></li>
+      <li>Wootton Library: <b>01234 766061</b></li>
+      <br>
+      <li>Bedford Creative Arts Centre: <b>01234 818670</b></li>
+      <li>Higgins Museum Bedford: <b>01234 718618</b></li>
+      <br>
+      <li>De Parys Medical Group: <b>01234 351341</b></li>
+      <li>Priory Health Clinic: <b>01234 262040</b></li>
+      <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
+      <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
+      <li>Bedford Talking therapy: <b>01234 880400</b></li>
+      <li>Path to Recovery: <b>0333 332 4019</b></li>
+      <li>Putnoe Medical Centre: <b>01234 319992</b></li>
+      <li>Bedford Borough Social Services: <b>01234 267422</b></li>
+      <li>Bedford Hospital: <b>01234 355122</b></li>
+    </ul>
+  </div>
 
-<!-- Phone panel -->
-<div id="phonePanel" class="phone-panel" aria-hidden="true">
-  <span class="panel-close" id="panelClose" role="button" aria-label="Close panel">✖</span>
-  <h3>Useful Phone Numbers</h3>
-  <ul>
-    <li>Citizens Advice Bedford: <b>01234 867944</b></li>
-    <li>Bedford Foodbank: <b>01234 268569</b></li>
-    <li>Job centre plus: <b>0845 604 3719</b></li>
-    <li>BRASS Bedford: <b>01234 211381</b></li>
-    <li>SMART First Point Bedford: <b>01234 365955</b></li>
-    <li>King's Arm Project: <b>01234 350900</b></li>
-    <br>
-    <li>CAMHS Bedford: <b>01234 893300</b></li>
-    <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
-    <br>
-    <li>YMCA Bedfordshire: <b>01234 307040</b></li>
-    <li>Bedford Central Library: <b>01234 718178</b></li>
-    <li>Kempston Library: <b>01234 276453</b></li>
-    <li>Wootton Library: <b>01234 766061</b></li>
-    <br>
-    <li>Bedford Creative Arts Centre: <b>01234 818670</b></li>
-    <li>Higgins Museum Bedford: <b>01234 718618</b></li>
-    <br>
-    <li>De Parys Medical Group: <b>01234 351341</b></li>
-    <li>Priory Health Clinic: <b>01234 262040</b></li>
-    <li>iCaSH Bedfordshire: <b>0300 300 3030</b></li>
-    <li>Beds Fire & Rescue Group: <b>01234 845000</b></li>
-    <li>Bedford Talking therapy: <b>01234 880400</b></li>
-    <li>Path to Recovery: <b>0333 332 4019</b></li>
-    <li>Putnoe Medical Centre: <b>01234 319992</b></li>
-    <li>Bedford Borough Social Services: <b>01234 267422</b></li>
-    <li>Bedford Hospital: <b>01234 355122</b></li>
-  </ul>
-</div>
-
-<!-- credit -->
-<div class="credit">Made by Aaima Shabir</div>
+  <!-- credit -->
+  <div class="credit">Made by Aaima Shabir</div>
 
 <script>
 /* -------------------------
@@ -291,7 +327,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-/* Full list of locations (name, postcode, category, optional description) */
+/* Locations list (same as before) */
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
@@ -323,10 +359,8 @@ const locations = [
     ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
 ];
 
-/* markerRefs will hold created marker objects and metadata for searching */
 const markerRefs = [];
 
-/* Fetch coordinates for all postcodes via postcodes.io (bulk) */
 fetch("https://api.postcodes.io/postcodes", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -375,7 +409,6 @@ input.addEventListener('input', () => {
   const html = matches.map(m => {
     const re = new RegExp('(' + escapeRegex(q) + ')', 'ig');
     const highlighted = m.name.replace(re, '<span class="match">$1</span>');
-
     const color = pastel[m.category] || '#888';
     return `<div class="suggestion" role="option" data-lat="${m.lat}" data-lon="${m.lon}">
               <div class="dot" style="background:${color}"></div>
@@ -404,7 +437,7 @@ document.addEventListener('click', (e) => {
   if (!box.contains(e.target)) suggestionsEl.style.display = 'none';
 });
 
-/* Close suggestions if phone panel opens, and vice versa */
+/* Phone panel open/close logic */
 const phoneBtn = document.getElementById('phoneBtn');
 const phonePanel = document.getElementById('phonePanel');
 const panelClose = document.getElementById('panelClose');
@@ -425,13 +458,14 @@ phoneBtn.addEventListener('click', () => {
   if (phonePanel.classList.contains('open')) closePhonePanel();
   else openPhonePanel();
 });
-
 panelClose.addEventListener('click', closePhonePanel);
 
+/* Prevent pinch-zoom gestures on some devices (existing) */
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 </script>
 </body>
 </html>
+
 
