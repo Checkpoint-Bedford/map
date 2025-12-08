@@ -116,7 +116,6 @@
         <br>
         <li>CAMHS Bedford: <b>01234 893300</b></li>
         <li>Recovery Lounge Bedford: <b>01234 343869</b></li>
-        <li>Queen's Park Family Hub: <b>0300 323 0245</b></li>
         <br>
         <li>YMCA Bedfordshire: <b>01234 307040</b></li>
         <li>Bedford Central Library: <b>01234 718178</b></li>
@@ -178,7 +177,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 
-// ✅ FIXED — Proper locations array
+
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
@@ -186,7 +185,9 @@ const locations = [
     ["Kings Arm Project", "MK42 9AZ", "Help Centre", "(add description here)"],
     ["SMART First Point Bedford", "MK40 3HZ", "Help Centre", "(add description here)"],
     ["Job Centre Plus", "MK40 2EH", "Help Centre", "(add description here)"],
-
+    ["Bedford Hospital", "MK42 9DJ", "Help Centre", "(A&E, crisis support available)"]
+    ["iCaSH Bedford", "MK42 0AH", "Local Service", "Sexual Health Clinic - offers STI testing, Advice & contraception"],
+    
     ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
     ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
     ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
@@ -209,10 +210,8 @@ const locations = [
     ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
     ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
-    ["iCaSH Bedford", "MK42 0AH", "Local Service", "(sexual health clinic)"],
     ["Putnoe Medical Centre", "MK41 9JE", "Local Service", "(add description here)"],
-    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"],
-    ["Bedford Hospital", "MK42 9DJ", "Local Service", "(A&E, crisis support available)"]
+    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"]
 ];
 
 
