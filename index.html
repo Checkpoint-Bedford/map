@@ -14,7 +14,6 @@
         margin: 0;
         font-family: Arial, sans-serif;
     }
-
     header {
         background: #1e3a8a;
         color: white;
@@ -23,12 +22,10 @@
         font-weight: bold;
         box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-
     #map {
         height: calc(100vh - 70px);
         width: 100%;
     }
-
     .legend {
         position: fixed;
         bottom: 40px;
@@ -41,7 +38,6 @@
         z-index: 9999;
         font-size: 13px;
     }
-
     .phone-btn {
         position: fixed;
         top: 90px;
@@ -56,7 +52,6 @@
         box-shadow: 0 3px 6px rgba(0,0,0,0.25);
         z-index: 999999;
     }
-
     .phone-panel {
         position: fixed;
         top: 0;
@@ -70,18 +65,15 @@
         transition: right 0.35s ease;
         z-index: 999999;
     }
-
     .phone-panel.open {
         right: 0;
     }
-
     .panel-close {
         float: right;
         cursor: pointer;
         font-size: 18px;
         margin-top: -5px;
     }
-
     .brand-tag {
         font-size: 12px;
         color: #d1d5db;
@@ -151,11 +143,12 @@ function togglePhonePanel() {
     document.getElementById("phonePanel").classList.toggle("open");
 }
 
+// Stop Safari zoom bug
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("gesturechange", e => e.preventDefault());
 document.addEventListener("gestureend", e => e.preventDefault());
 
-// Marker colors
+// Marker colours
 const pastel = {
     "Help Centre": "#d62828",
     "Wellbeing": "#1d4ed8",
@@ -169,10 +162,7 @@ function cartoonIcon(color) {
     return L.divIcon({
         html: `
             <svg width="28" height="28" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40"
-                    fill="${color}"
-                    stroke="black"
-                    stroke-width="3"/>
+                <circle cx="50" cy="50" r="40" fill="${color}" stroke="black" stroke-width="3"/>
             </svg>
         `,
         className: "",
@@ -181,14 +171,14 @@ function cartoonIcon(color) {
     });
 }
 
-const map = L.map("map", { maxZoom: 16 })
-.setView([52.135, -0.47], 12);
+const map = L.map("map", { maxZoom: 16 }).setView([52.135, -0.47], 12);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// Locations array with a separate description field for each
+
+// ✅ FIXED — Proper locations array
 const locations = [
     ["Citizens Advice Bedford", "MK40 1TP", "Help Centre", "(add description here)"],
     ["Bedford Foodbank", "MK41 7PE", "Help Centre", "(add description here)"],
@@ -200,7 +190,7 @@ const locations = [
     ["CAMHS", "MK42 9DJ", "Wellbeing", "(add description here)"],
     ["Recovery Lounge Bedford", "MK40 2NX", "Wellbeing", "(add description here)"],
     ["Bedford Talking Therapies", "MK40 2AW", "Wellbeing", "(add description here)"],
-    ["Path to recovery", "MK40 2RT", "Wellbeing", "(Add description here)"],
+    ["Path to Recovery", "MK40 2RT", "Wellbeing", "(add description here)"],
 
     ["Bedford Central Library", "MK40 1PG", "Education", "(add description here)"],
     ["Kempston Library", "MK42 8AT", "Education", "(add description here)"],
@@ -219,15 +209,14 @@ const locations = [
     ["Queen’s Park Surgery", "MK40 4HR", "Local Service", "(add description here)"],
     ["London Road Surgery", "MK42 0NT", "Local Service", "(add description here)"],
     ["Beds Fire & Rescue Community", "MK41 9LN", "Local Service", "(add description here)"],
-    ["Icash", "MK42 0AH", "Local Service", "(add description here abortion clinic too )"],
-    ["Putnoe Medical centre", "MK41 9JE", "Local Service", "(add description here)"],
-    ["Bedford Borough Social Services", "MK42 9AP", "Local Services", "(add description here)"],
-    ["Bedford Hospital", "MK42 9DJ", "Local Services", "(description, ae, crisis)"]
-    ["
-    
-    
+    ["iCaSH Bedford", "MK42 0AH", "Local Service", "(sexual health clinic)"],
+    ["Putnoe Medical Centre", "MK41 9JE", "Local Service", "(add description here)"],
+    ["Bedford Borough Social Services", "MK42 9AP", "Local Service", "(add description here)"],
+    ["Bedford Hospital", "MK42 9DJ", "Local Service", "(A&E, crisis support available)"]
 ];
 
+
+// Fetch postcode coords
 fetch("https://api.postcodes.io/postcodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -242,15 +231,13 @@ fetch("https://api.postcodes.io/postcodes", {
         const lat = entry.result.latitude;
         const lon = entry.result.longitude;
 
-        L.marker([lat, lon], {
-            icon: cartoonIcon(pastel[category])
-        })
-        .bindPopup(`
-            <b>${name}</b><br>
-            ${postcode}<br>
-            <span style="color:#555; font-style:italic;">${description}</span>
-        `)
-        .addTo(map);
+        L.marker([lat, lon], { icon: cartoonIcon(pastel[category]) })
+            .bindPopup(`
+                <b>${name}</b><br>
+                ${postcode}<br>
+                <span style="color:#555; font-style:italic;">${description}</span>
+            `)
+            .addTo(map);
     });
 });
 </script>
