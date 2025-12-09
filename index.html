@@ -256,6 +256,7 @@ function closePhonePanel(){ phonePanel.classList.remove('open'); phonePanel.setA
 phoneBtn.addEventListener('click',()=>{ if(phonePanel.classList.contains('open')) closePhonePanel(); else openPhonePanel(); });
 panelClose.addEventListener('click',closePhonePanel);
 
+  // preventing glitching on mobile
 
 document.addEventListener("gesturestart",e=>e.preventDefault());
 document.addEventListener("gesturechange",e=>e.preventDefault());
